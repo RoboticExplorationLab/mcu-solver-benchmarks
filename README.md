@@ -1,6 +1,6 @@
 # mcu-solver-benchmarks
 
-Within TinyMPC project
+Benchmarking solvers on microcontrollers (MCU), within TinyMPC project
 
 ## Installation
 
