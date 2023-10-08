@@ -13,7 +13,7 @@ Within TinyMPC project
 ## How to use
 
 1. Config your MCU with PlatformIO
-2. Move to `rand_prob_gen` dir
+2. Move to `qp_mpc_problem` dir
 3. Config and run `gen_mpc_problem.py`
 4. Config and run `move_to_mcu_dir.py`
 5. Upload and run the program with your MCU

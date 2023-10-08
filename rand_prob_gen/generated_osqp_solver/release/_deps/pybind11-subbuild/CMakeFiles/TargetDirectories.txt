@@ -1,3 +1,0 @@
-/home/khai/SSD/Code/mcu-testing/rand_prob_gen/generated_osqp_solver/release/_deps/pybind11-subbuild/CMakeFiles/rebuild_cache.dir
-/home/khai/SSD/Code/mcu-testing/rand_prob_gen/generated_osqp_solver/release/_deps/pybind11-subbuild/CMakeFiles/edit_cache.dir
-/home/khai/SSD/Code/mcu-testing/rand_prob_gen/generated_osqp_solver/release/_deps/pybind11-subbuild/CMakeFiles/pybind11-populate.dir
