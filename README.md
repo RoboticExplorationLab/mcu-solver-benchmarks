@@ -1,4 +1,4 @@
-# mcu-testing
+# mcu-solver-benchmarks
 
 Within TinyMPC project
 
