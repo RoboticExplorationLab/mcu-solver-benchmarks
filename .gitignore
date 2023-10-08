@@ -1,6 +1,7 @@
 # Project-specific files
 random_problems
 .vscode
+image.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
