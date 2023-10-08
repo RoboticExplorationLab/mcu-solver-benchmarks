@@ -275,9 +275,10 @@ if __name__ == '__main__':
     Nh = 10
     Nsim = 200
 
-    for nx in [8]:
+    for nx in [10]:
         os.system('mkdir random_problems/prob_nx_'+str(nx))
         generate_data(nx, nu, Nh, Nsim)
+        print('generated: random_problems/prob_nx_'+str(nx))
 
     # # ## Vary nu
     # nx = 10

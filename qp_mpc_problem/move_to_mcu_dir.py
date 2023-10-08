@@ -25,26 +25,28 @@ SOLVER = 'OSQP'
 # dataset = np.zeros((24, 4+200+1+1+1))
 
 for prob_i, prob_dir in enumerate(os.listdir(path_to_root+'/random_problems/')):
-    if prob_dir == 'prob_nx_8':  # Select problem instance (directory)
+    if prob_dir == 'prob_nx_10':  # Select problem instance (directory)
     # if 'Nh' in prob_dir or 'nx' in prob_dir or 'nu' in prob_dir:
         path_to_prob_dir = path_to_root+'/random_problems/'+prob_dir
 
         # Transfer for the new problem to PlatformIO directories
         if SOLVER == 'OSQP':
+            mcu_dir = path_to_root + '/../teensy_osqp_benchmark'
             generate_osqp_solver(path_to_prob_dir)  # generate C code here, use OSQP v1
-            os.system('cp -R '+path_to_prob_dir+'/generated_osqp_solver/osqp_configure.h '+path_to_root+'/../teensy_osqp_benchmark/lib/osqp/inc/osqp_configure.h')
-            os.system('cp -R '+path_to_prob_dir+'/generated_osqp_solver/osqp_data_workspace.h '+path_to_root+'/../teensy_osqp_benchmark/include/osqp_data_workspace.h')
-            os.system('cp -R '+path_to_prob_dir+'/generated_osqp_solver/osqp_data_workspace.c '+path_to_root+'/../teensy_osqp_benchmark/src/osqp_data_workspace.c')
-            os.system('cp -R '+path_to_prob_dir+'/rand_prob_osqp_params.npz '+path_to_root+'/../teensy_osqp_benchmark/src/rand_prob_osqp_params.npz')
-            os.system('cp -R '+path_to_prob_dir+'/rand_prob_osqp_xbar.h '+path_to_root+'/../teensy_osqp_benchmark/lib/osqp/inc/public/rand_prob_osqp_xbar.h')
+            os.system('cp -R '+path_to_prob_dir+'/generated_osqp_solver/osqp_configure.h '+mcu_dir+'/lib/osqp/inc/osqp_configure.h')
+            os.system('cp -R '+path_to_prob_dir+'/generated_osqp_solver/osqp_data_workspace.h '+mcu_dir+'/include/osqp_data_workspace.h')
+            os.system('cp -R '+path_to_prob_dir+'/generated_osqp_solver/osqp_data_workspace.c '+mcu_dir+'/src/osqp_data_workspace.c')
+            os.system('cp -R '+path_to_prob_dir+'/rand_prob_osqp_params.npz '+mcu_dir+'/src/rand_prob_osqp_params.npz')
+            os.system('cp -R '+path_to_prob_dir+'/rand_prob_osqp_xbar.h '+mcu_dir+'/lib/osqp/inc/public/rand_prob_osqp_xbar.h')
             print("For OSQP")
 
         if SOLVER == 'TinyMPC':
-            os.system('cp -R '+path_to_prob_dir+'/rand_prob_tinympc_params.hpp '+path_to_root+'/../teensy_tinympc_benchmark/include/problem_data/rand_prob_tinympc_params.hpp')
-            os.system('cp -R '+path_to_prob_dir+'/rand_prob_tinympc_xbar.hpp '+path_to_root+'/../teensy_tinympc_benchmark/include/problem_data/rand_prob_tinympc_xbar.hpp')
-            os.system('cp -R '+path_to_prob_dir+'/constants.hpp '+path_to_root+'/../teensy_tinympc_benchmark/include/constants.hpp')
+            mcu_dir = path_to_root + '/../teensy_tinympc_benchmark'
+            os.system('cp -R '+path_to_prob_dir+'/rand_prob_tinympc_params.hpp '+mcu_dir+'/include/problem_data/rand_prob_tinympc_params.hpp')
+            os.system('cp -R '+path_to_prob_dir+'/rand_prob_tinympc_xbar.hpp '+mcu_dir+'/include/problem_data/rand_prob_tinympc_xbar.hpp')
+            os.system('cp -R '+path_to_prob_dir+'/constants.hpp '+mcu_dir+'/include/constants.hpp')
             print("For TinyMPC")
-        print(prob_dir)
+        print("moved: " + prob_dir)
         # Time OSQP
         # os.system('cd /Users/anoushkaalavill/Documents/REx_Lab/mcu-testing/teensy_tinympc_benchmark; pio run --target upload')
         # os.system('cd '+path_to_root+'/teensy_tinympc_benchmark; pio run --target upload')
