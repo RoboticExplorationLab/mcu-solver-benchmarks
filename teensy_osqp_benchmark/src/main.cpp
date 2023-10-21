@@ -11,7 +11,6 @@
 #include "osqp.h"
 #include "osqp_data_workspace.h"
 #include "rand_prob_osqp_xbar.h"
-#include "osqp_api_types.h"
 #include "math.h"
 
 #ifndef LED_BUILTIN

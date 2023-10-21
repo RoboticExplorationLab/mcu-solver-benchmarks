@@ -2,16 +2,6 @@
 
 #include "admm.hpp"
 
-#include <admm.hpp>
-#include "Arduino.h"
-// #include "problem_data/quadrotor_50hz_params.hpp"
-// #include "problem_data/quadrotor_50hz_params_3.hpp"
-// #include "problem_data/quadrotor_50hz_params_unconstrained.hpp"
-// #include "problem_data/quadrotor_50hz_params_constrained.hpp"
-// #include "trajectory_data/quadrotor_50hz_line_5s.hpp"
-// #include "trajectory_data/quadrotor_50hz_line_9s.hpp"
-using Eigen::Matrix;
-
 #define DEBUG_MODULE "TINYALG"
 
 extern "C" {
@@ -172,8 +162,8 @@ void update_slack(struct tiny_problem *problem, const struct tiny_params *params
     //      The only reason this doesn't break is because in the update_linear_cost function subtracts
     //      g from v and so the last nine entries are always zero.
     // problem->xg = problem->x + problem->g;
-    // // problem->dists = (params->A_constraints.transpose().cwiseProduct(problem->xg)).colwise().sum();
-    // // problem->dists -= params->x_max;
+    // problem->dists = (params->A_constraints.transpose().cwiseProduct(problem->xg)).colwise().sum();
+    // problem->dists -= params->x_max;
     // // startTimestamp = usecTimestamp();
     // problem->cache_level = 0;
     // for (int i=0; i<NHORIZON; i++) {
