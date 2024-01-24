@@ -1,0 +1,11 @@
+{
+    "name": "tinympc",
+    "version": "0.0.0",
+    "build": {
+      "includeDir": ".",
+      "flags": [
+        "-I",
+        "-I Eigen"
+      ]
+    }
+  }
