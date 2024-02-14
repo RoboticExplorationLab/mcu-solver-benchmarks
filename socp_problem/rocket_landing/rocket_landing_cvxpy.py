@@ -25,12 +25,13 @@ def mpc_cvxpy(params, X, U, A, B, f):
     x0 = X[0].copy()  # initial state
 
     z = cp.Variable(NN, nonneg=True)
-    inds = np.reshape(np.arange(1, (nx + nu) * Nh + 1), (nx + nu, Nh), order='F')
+    inds = np.reshape(np.arange(0, NN + nu), (nx + nu, Nh), order='F')
     print('inds', inds.shape)
-    xinds = [inds[:nx, i] for i in range(Nh - 1)] + [inds[:nx, Nh - 1]]
-    print('xinds', len(xinds))
+    xinds = [inds[:nx, i] for i in range(Nh)]
+    print('xinds', (xinds))
     uinds = [inds[nx:, i] for i in range(Nh - 1)]
-    print('uinds', len(uinds))
+    print('uinds', (uinds))
+
     # Objective function
     P = np.zeros((NN, NN))
     q = np.zeros((NN, 1))
@@ -51,18 +52,19 @@ def mpc_cvxpy(params, X, U, A, B, f):
     if q.shape != z.shape:
         q = q.reshape(z.shape)
     objective = cp.Minimize(0.5 * cp.quad_form(z, P) + cp.sum(cp.multiply(q, z)))
-    #objective = cp.Minimize(0.5 * cp.quad_form(z, P) + q.T @ z)
+    # objective = cp.Minimize(0.5 * cp.quad_form(z, P) + q.T @ z)
     constraints = []
     # Dynamics Constraints
     for k in range(Nh - 2):
         constraints.append(A @ z[xinds[k]] + B @ z[uinds[k]] + f == z[xinds[k+1]])
     constraints.append(z[xinds[0]] == x0)
-    constraints = []
+    # print("z0 === ", xinds[1])
+    # constraints = []
     # Thrust angle constraint (SOC): norm([u1,u2]) <= alpha_max * u3
-    if params["ncu_cone"] > 0:
-        for k in range(Nh-1):
-            u1, u2, u3 = z[uinds[k]]
-            constraints.append(cp.norm(cp.vstack([alpha_max * u3, u1, u2])) <= alpha_max * u3)
+    # if params["ncu_cone"] > 0:
+    #     for k in range(Nh-1):
+    #         u1, u2, u3 = z[uinds[k]]
+    #         constraints.append(cp.norm(cp.vstack([alpha_max * u3, u1, u2])) <= alpha_max * u3)
     """
     if params['ncu_cone'] > 0:
         for k in range(Nh - 1):
@@ -75,24 +77,24 @@ def mpc_cvxpy(params, X, U, A, B, f):
             constraints.append(cp.SOC(alpha_max * u3, soc_constraint_vector))
     """
     # State constraints
-    if params['ncx'] > 0:
-        for k in range(Nh):
-            constraints.append(z[xinds[k]] <= params['x_max'])
-            constraints.append(z[xinds[k]] >= params['x_min'])
+    # if params['ncx'] > 0:
+    #     for k in range(Nh):
+    #         constraints.append(z[xinds[k]] <= params['x_max'])
+    #         constraints.append(z[xinds[k]] >= params['x_min'])
 
-    # Input constraints
-    if params['ncu'] > 0:
-        for k in range(Nh-1):
-            constraints.append(z[uinds[k]] <= params['u_max'])
-            constraints.append(z[uinds[k]] >= params['u_min'])
+    # # Input constraints
+    # if params['ncu'] > 0:
+    #     for k in range(Nh-1):
+    #         constraints.append(z[uinds[k]] <= params['u_max'])
+    #         constraints.append(z[uinds[k]] >= params['u_min'])
     
-    # Goal constraint
-    if params['ncg'] > 0:
-        constraints.append(z[xinds[N-2]] == np.zeros(nx))
+    # # Goal constraint
+    # if params['ncg'] > 0:
+    #     constraints.append(z[xinds[N-2]] == np.zeros(nx))
     
     # Solve
     problem = cp.Problem(objective,constraints)
-    problem.solve(verbose=True, solver = 'ECOS', feastol = 1e-4,abstol=1e-4, reltol =1e-4)
+    # problem.solve(verbose=True, solver = 'ECOS', feastol = 1e-4,abstol=1e-4, reltol =1e-4)
     """
     # Extract results
     for j in range(Nh-2):
@@ -135,8 +137,8 @@ if __name__ == "__main__":
     Xref = [x0 + (xg - x0) * k / (N-1) for k in range(N)]
 
     Uref = [[0, 0, 10.] for _ in range(N - 1)]
-    print('Xref', Xref)
-    print('Uref', len(Uref))
+    # print('Xref', Xref)
+    # print('Uref', len(Uref))
     Q = 1e2 * np.eye(nx)
     R = 1e0 * np.eye(nu)
     Qf = 1e3 * np.eye(nx)
@@ -158,8 +160,8 @@ if __name__ == "__main__":
 
     ncx = 0
     ncu = 2 * nu*1
-    ncg = 1
-    ncu_cone = nu
+    ncg = 0
+    ncu_cone = 0
     cone_scale = 1e-3
 
     μ = [np.zeros(nu) for _ in range(N - 1)]  # input constraints
