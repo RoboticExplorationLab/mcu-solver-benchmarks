@@ -1,5 +1,6 @@
 import numpy as np
 import cvxpy as cp
+from cvxpygen import cpg
 
 def stage_cost_expansion(p, k):
     dx = -np.array(p['Xref'][k])
@@ -32,6 +33,10 @@ def mpc_cvxpy(params, X, U, A, B, f):
     uinds = [inds[nx:, i] for i in range(Nh - 1)]
     # print('uinds', (uinds))
 
+    # Define parameters
+    P_param = cp.Parameter((NN, NN),symmetric=True, value=np.zeros((NN, NN)) )
+    q_param = cp.Parameter((NN, 1), value =np.zeros((NN, 1)) )
+
     # Objective function
     P = np.zeros((NN, NN))
     q = np.zeros((NN, 1))
@@ -49,10 +54,16 @@ def mpc_cvxpy(params, X, U, A, B, f):
     q[-nx:] = dQf.reshape(-1, 1)    
     print('P', P[0:10, 0:10])
     print('q', q[0:10])
+    P_param.value = P
+    q_param.value = q
+    print('z',z.shape)
     if q.shape != z.shape:
         q = q.reshape(z.shape)
-
-    objective = cp.Minimize(0.5 * cp.quad_form(z, P) + q.T @ z)
+    print('P',P.shape)
+    print('P_param',P_param.shape)
+    print('q',q.shape)
+    print('q_param',q_param.shape)  
+    objective = cp.Minimize(0.5 * cp.quad_form(z, P_param) + q_param.T @ z)
     constraints = []
 
     # Dynamics Constraints
@@ -96,7 +107,15 @@ def mpc_cvxpy(params, X, U, A, B, f):
     # Solve
     problem = cp.Problem(objective,constraints)
     #problem.solve(verbose=True, feastol = 1e-4,abstol=1e-4, reltol =1e-4)
+    try:
+        problem.solve(verbose=True, solver="ECOS", abstol=1e-2)
+    except cp.error.DCPError as e:
+        print("DCPError:", e)
+        return None
     problem.solve(verbose=True, solver="ECOS", abstol=1e-2)
+
+    # generate code
+    cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS')
     """
     # Extract results
     for j in range(Nh-2):
