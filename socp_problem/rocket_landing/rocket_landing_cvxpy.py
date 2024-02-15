@@ -1,6 +1,7 @@
 import numpy as np
 import cvxpy as cp
 from cvxpygen import cpg
+import scipy
 
 def stage_cost_expansion(p, k):
     dx = -np.array(p['Xref'][k])
@@ -54,7 +55,8 @@ def mpc_cvxpy(params, X, U, A, B, f):
     q[-nx:] = dQf.reshape(-1, 1)    
     print('P', P[0:10, 0:10])
     print('q', q[0:10])
-    P_param.value = P
+    P_param.value = scipy.linalg.sqrtm(P)
+    #P_param.value = P
     q_param.value = q
     print('z',z.shape)
     if q.shape != z.shape:
@@ -63,7 +65,9 @@ def mpc_cvxpy(params, X, U, A, B, f):
     print('P_param',P_param.shape)
     print('q',q.shape)
     print('q_param',q_param.shape)  
-    objective = cp.Minimize(0.5 * cp.quad_form(z, P_param) + q_param.T @ z)
+
+    objective = cp.Minimize(0.5 * cp.sum_squares(P_param @z) + q_param.T @ z)
+    #objective = cp.Minimize(0.5 * cp.quad_form(z, P_param) + q_param.T @ z)
     constraints = []
 
     # Dynamics Constraints
