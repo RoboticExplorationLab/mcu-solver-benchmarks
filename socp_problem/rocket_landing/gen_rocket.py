@@ -53,18 +53,18 @@ def mpc_cvxpy(params, X, U, A, B, f):
     Qf, dQf = term_cost_expansion(params)
     P[-nx:, -nx:] = Qf  
     q[-nx:] = dQf.reshape(-1, 1)    
-    print('P', P[0:10, 0:10])
-    print('q', q[0:10])
+    # print('P', P[0:10, 0:10])
+    # print('q', q[0:10])
     P_param.value = scipy.linalg.sqrtm(P)
     #P_param.value = P
     q_param.value = q
-    print('z',z.shape)
+    # print('z',z.shape)
     if q.shape != z.shape:
         q = q.reshape(z.shape)
-    print('P',P.shape)
-    print('P_param',P_param.shape)
-    print('q',q.shape)
-    print('q_param',q_param.shape)  
+    # print('P',P.shape)
+    # print('P_param',P_param.shape)
+    # print('q',q.shape)
+    # print('q_param',q_param.shape)  
 
     objective = cp.Minimize(0.5 * cp.sum_squares(P_param @z) + q_param.T @ z)
     #objective = cp.Minimize(0.5 * cp.quad_form(z, P_param) + q_param.T @ z)
@@ -77,10 +77,10 @@ def mpc_cvxpy(params, X, U, A, B, f):
     constraints.append(z[xinds[0]] == x0)
 
     # Thrust angle constraint (SOC): norm([u1,u2]) <= alpha_max * u3
-    if params["ncu_cone"] > 0:
-        for k in range(Nh-1):
-            u1, u0 = z[uinds[k]][0:2], z[uinds[k]][2]
-            constraints.append(cp.norm(u1) <= alpha_max * u0)
+    # if params["ncu_cone"] > 0:
+    #     for k in range(Nh-1):
+    #         u1, u0 = z[uinds[k]][0:2], z[uinds[k]][2]
+    #         constraints.append(cp.norm(u1) <= alpha_max * u0)
     """
     if params['ncu_cone'] > 0:
         for k in range(Nh - 1):
@@ -116,7 +116,7 @@ def mpc_cvxpy(params, X, U, A, B, f):
     except cp.error.DCPError as e:
         print("DCPError:", e)
         return None
-    problem.solve(verbose=True, solver="ECOS", abstol=1e-2)
+    problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
 
     # generate code
     # cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS')
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     nx = 6
     nu = 3
-    N = 10 # horizon length, short for MPC
+    N = 301 # horizon length, short for MPC
     dt = 0.05
     t_vec = dt * np.arange(N)
     print('t_vec', t_vec.shape)
@@ -158,16 +158,17 @@ if __name__ == "__main__":
     xg = np.array([0, 0, 0, 0, 0, 0.0])
     Xref = [x0 + (xg - x0) * (k - 1) / (N - 1) for k in range(0, N)]
     """
-    x0 = np.array([4, 2, 20, -1, 2, -4.0])
+    x0 = np.array([4, 2, 20, -3, 3, -5.0])
     xg = np.array([0, 0, 0, 0, 0, 0.0])
-    Xref = [x0 + (xg - x0) * k / (N-1) for k in range(N)]
+    Xref_all = [x0 + (xg - x0) * k / (301-1) for k in range(301)]
+    Xref = Xref_all[0:N]
 
     Uref = [[0, 0, 10.] for _ in range(N - 1)]
     # print('Xref', Xref)
     # print('Uref', len(Uref))
     Q = 1e2 * np.eye(nx)
     R = 1e0 * np.eye(nu)
-    Qf = 1e2 * np.eye(nx)
+    Qf = Q*1
 
     gravity = np.array([0, 0, -9.81])
     mass = 10.0
@@ -180,7 +181,7 @@ if __name__ == "__main__":
     u_bnd = mass * np.abs(gravity[2]) * perWeightMax
     # print('u_bnd', u_bnd.shape)
     # Sloppy bounds to test
-    u_min = 20 * np.ones(nu)
+    u_min = -10 * np.ones(nu)
     u_max = 105.0 * np.ones(nu)
     x_min = [-5, -5, 0, -10, -10, -10.0]
     x_max = [5, 5, 20, 10, 10, 10.0]
@@ -188,7 +189,7 @@ if __name__ == "__main__":
     ncx = 0
     ncu = 1
     ncg = 0
-    ncu_cone = 1
+    ncu_cone = 0
     cone_scale = 1e-3
 
     params = {
@@ -212,7 +213,6 @@ if __name__ == "__main__":
         'Uref': Uref,
         'dt': dt,
     }
-    params['N'] = N
 
     X = [np.copy(x0) for _ in range(N)]
     print('X', len(X))

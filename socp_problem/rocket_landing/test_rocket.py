@@ -55,13 +55,13 @@ f = np.array([0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905])
 
 NSTATES = 6
 NINPUTS = 3
-NHORIZON = 20 # horizon length, short for MPC
+NHORIZON = 21 # horizon length, short for MPC
 NTOTAL = 301
 dt = 0.05
 t_vec = dt * np.arange(NTOTAL)
 # print('t_vec', t_vec.shape)
 
-x0 = np.array([4, 2, 20, -3, 3, -5.0])
+x0 = np.array([4, 2, 20, -3, 2, -4.5])
 xg = np.array([0, 0, 0, 0, 0, 0.0])
 Xref = [x0 + (xg - x0) * k / (NTOTAL-1) for k in range(NTOTAL)]
 Uref = [[0, 0, 10.] for _ in range(NTOTAL - 1)]
@@ -70,7 +70,7 @@ Uref_hrz = Uref[:NHORIZON-1]*1
 
 # print('Xref', Xref)
 # print('Uref', len(Uref))
-Q = 1e2 * np.eye(NSTATES)
+Q = 1e3 * np.eye(NSTATES)
 R = 1e0 * np.eye(NINPUTS)
 Qf = Q*1
 
@@ -142,9 +142,9 @@ for k in range(NHORIZON - 2):
 constraints.append(z[xinds[0]] == x0_param)
 
 # Thrust angle constraint (SOC): norm([u1,u2]) <= alpha_max * u3
-# for k in range(NHORIZON-1):
-#     u1, u0 = z[uinds[k]][0:2], z[uinds[k]][2]
-#     constraints.append(cp.norm(u1) <= 0.4 * u0)
+for k in range(NHORIZON-1):
+    u1, u0 = z[uinds[k]][0:2], z[uinds[k]][2]
+    constraints.append(cp.norm(u1) <= 0.25 * u0)
 
 # State constraints
 # for k in range(NHORIZON):
@@ -165,10 +165,10 @@ problem = cp.Problem(objective,constraints)
 np.random.seed(1234)
 NRUNS = NTOTAL - NHORIZON - 1
 Xhist = np.zeros((NSTATES, NTOTAL))
-Xhist[:, 0] = x0*1
+Xhist[:, 0] = x0*1.1
 Uhist = np.zeros((NINPUTS, NTOTAL-1))
 
-for k in range(2):
+for k in range(NRUNS):
     # Get measurements
     x0_param.value = Xhist[:, k]*1
 
@@ -176,7 +176,7 @@ for k in range(2):
     params["Xref"] = Xref[k:k+NHORIZON]*1
     params["Uref"] = Uref[k:k+NHORIZON-1]*1
     P_param.value, q_param.value = update_linear_term(params)
-    print(P_param.value, q_param.value,x0_param.value)
+    # print(P_param.value, q_param.value,x0_param.value)
     
     # Solve MPC problem
     problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
@@ -190,8 +190,8 @@ for k in range(2):
     # Simulate system
     Xhist[:, k+1] = A @ Xhist[:, k] + B @ Uhist[:, k] + f
 
-print(U)
-print(X)
+# print(U)
+# print(X)
 # plot results
 import matplotlib.pyplot as plt
 plt.figure()
@@ -200,4 +200,9 @@ plt.plot(Xhist[:3,:NRUNS-1].T)
 plt.title('States')
 plt.show()
 
+plt.figure()
+plt.plot(Uhist[:,:NRUNS-1].T)
+# plt.plot(np.array(X))
+plt.title('Controls')
+plt.show()
 
