@@ -174,46 +174,49 @@ params["Uref"] = Uref[0:NHORIZON-1]*1
 P_param.value, q_param.value = update_linear_term(params)
 
 # GENERATE CODE (uncomment to generate code)
-# cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS', solver_opts=opts)
+GEN_CODE = 1
 
-# problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
-# print(z.value)
+if GEN_CODE:
+    cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS', solver_opts=opts)
 
-for k in range(NRUNS):
-    # Get measurements
-    x0_param.value = Xhist[:, k]*1
-
-    # Update references
-    params["Xref"] = Xref[k:k+NHORIZON]*1
-    params["Uref"] = Uref[k:k+NHORIZON-1]*1
-    P_param.value, q_param.value = update_linear_term(params)
-    # print(P_param.value, q_param.value,x0_param.value)
-    
-    # Solve MPC problem
     problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
-    # Extract results
-    for j in range(NHORIZON-1):
-        X[j] = z[xinds[j]].value
-        U[j] = z[uinds[j]].value
-    X[NHORIZON-1] = z[xinds[NHORIZON-1]].value
-    Uhist[:, k] = U[0]*1
+    print(z.value)
+else:
+    for k in range(NRUNS):
+        # Get measurements
+        x0_param.value = Xhist[:, k]*1
 
-    # Simulate system
-    Xhist[:, k+1] = A @ Xhist[:, k] + B @ Uhist[:, k] + f
+        # Update references
+        params["Xref"] = Xref[k:k+NHORIZON]*1
+        params["Uref"] = Uref[k:k+NHORIZON-1]*1
+        P_param.value, q_param.value = update_linear_term(params)
+        # print(P_param.value, q_param.value,x0_param.value)
+        
+        # Solve MPC problem
+        problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
+        # Extract results
+        for j in range(NHORIZON-1):
+            X[j] = z[xinds[j]].value
+            U[j] = z[uinds[j]].value
+        X[NHORIZON-1] = z[xinds[NHORIZON-1]].value
+        Uhist[:, k] = U[0]*1
 
-# print(U)
-# print(X)
-# plot results
-import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(Xhist[:3,:NRUNS-1].T)
-# plt.plot(np.array(X))
-plt.title('States')
-plt.show()
+        # Simulate system
+        Xhist[:, k+1] = A @ Xhist[:, k] + B @ Uhist[:, k] + f
 
-plt.figure()
-plt.plot(Uhist[:,:NRUNS-1].T)
-# plt.plot(np.array(X))
-plt.title('Controls')
-plt.show()
+    # print(U)
+    # print(X)
+    # plot results
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(Xhist[:3,:NRUNS-1].T)
+    # plt.plot(np.array(X))
+    plt.title('States')
+    plt.show()
+
+    plt.figure()
+    plt.plot(Uhist[:,:NRUNS-1].T)
+    # plt.plot(np.array(X))
+    plt.title('Controls')
+    plt.show()
 
