@@ -80,7 +80,7 @@ def mpc_cvxpy(params, X, U, A, B, f):
     if params["ncu_cone"] > 0:
         for k in range(Nh-1):
             u1, u0 = z[uinds[k]][0:2], z[uinds[k]][2]
-            constraints.append(cp.norm(u1) <= 0.4 * u0)
+            constraints.append(cp.norm(u1) <= alpha_max * u0)
     """
     if params['ncu_cone'] > 0:
         for k in range(Nh - 1):
@@ -119,7 +119,7 @@ def mpc_cvxpy(params, X, U, A, B, f):
     problem.solve(verbose=True, solver="ECOS", abstol=1e-2)
 
     # generate code
-    cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS')
+    # cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS')
     """
     # Extract results
     for j in range(Nh-2):
@@ -176,6 +176,7 @@ if __name__ == "__main__":
 
     A_cone = np.array([[1, 0, 0], [0, 1.0, 0]])
     c_cone = np.array([0.0, 0.0, np.tan(np.radians(θ_thrust_max))])
+    c_cone = np.array([0.0, 0.0, 0.4])
     u_bnd = mass * np.abs(gravity[2]) * perWeightMax
     # print('u_bnd', u_bnd.shape)
     # Sloppy bounds to test
