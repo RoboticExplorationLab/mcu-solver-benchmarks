@@ -120,13 +120,13 @@ int main(int argc, char *argv[]){
   cpg_set_solver_abstol(1e-2);
   cpg_set_solver_reltol(1e-2);
 
-  for (int k = 0; k < 2; ++k) {
+  for (int k = 0; k < NRUNS; ++k) {
     //// Update current measurement
     for (int i = 0; i < NSTATES; ++i)
     {
       cpg_update_param1(i, x[i]);
     }
-    printf("x = ");
+    printf(" x = ");
     print_vector(x, NSTATES);
 
     // for (int i = 0; i < NHORIZON; ++i)
@@ -134,21 +134,6 @@ int main(int argc, char *argv[]){
     //   printf(" cpg_params_vec[0] = %f\n", cpg_params_vec[i]);
     // }
 
-    //// Update references
-    for (int i = 0; i < NHORIZON; ++i)
-    {
-      for (int j = 0; j < NSTATES; ++j)
-      {
-        temp = xref0[j] + (0-xref0[j]) * (k+i) / (NTOTAL-1);
-        // printf("temp = %f\n", temp);
-        cpg_update_param3(i*(NSTATES+NINPUTS) + j, -Q_single * temp);
-      }
-    }
-    // for (int i = 0; i < NHORIZON; ++i)
-    // {
-    //   printf("  cpg_params_vec[0] = %f\n", cpg_params_vec[i]);
-    // }
-    
     // Solve the problem instance
     cpg_solve();
 
