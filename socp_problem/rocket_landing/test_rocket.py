@@ -125,12 +125,10 @@ uinds = [inds[NSTATES:, i] for i in range(NHORIZON - 1)]
 
 # import pdb; pdb.set_trace()
 
-P_param = cp.Parameter((NN, NN),symmetric=True, value=np.zeros((NN, NN)) )
 q_param = cp.Parameter((NN, 1), value =np.zeros((NN, 1)))
-P_param.value, q_param.value = update_linear_term(params)
-# print(P_param.value, q_param.value)
+P, q_param.value = update_linear_term(params)  # P is unchanged
 
-objective = cp.Minimize(0.5 * cp.sum_squares(P_param @z) + q_param.T @ z)
+objective = cp.Minimize(0.5 * cp.sum_squares(P @ z) + q_param.T @ z)
 #objective = cp.Minimize(0.5 * cp.quad_form(z, P_param) + q_param.T @ z)
 constraints = []
 
@@ -171,10 +169,10 @@ Uhist = np.zeros((NINPUTS, NTOTAL-1))
 x0_param.value = Xhist[:, 0]*1
 params["Xref"] = Xref[0:NHORIZON]*1
 params["Uref"] = Uref[0:NHORIZON-1]*1
-P_param.value, q_param.value = update_linear_term(params)
+q_param.value = update_linear_term(params)[1]  
 
 # GENERATE CODE (uncomment to generate code)
-GEN_CODE = 1
+GEN_CODE = 0
 
 if GEN_CODE:
     cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS', solver_opts=opts)
@@ -182,18 +180,19 @@ if GEN_CODE:
     problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
     print(z.value)
 else:
-    for k in range(NRUNS):
+    for k in range(2):
         # Get measurements
         x0_param.value = Xhist[:, k]*1
 
         # Update references
         params["Xref"] = Xref[k:k+NHORIZON]*1
         params["Uref"] = Uref[k:k+NHORIZON-1]*1
-        P_param.value, q_param.value = update_linear_term(params)
-        # print(P_param.value, q_param.value,x0_param.value)
+        q_param.value = update_linear_term(params)[1]
+        # print(q_param.value, x0_param.value)
         
         # Solve MPC problem
         problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
+        print(z.value)
         # Extract results
         for j in range(NHORIZON-1):
             X[j] = z[xinds[j]].value
@@ -206,7 +205,7 @@ else:
 
     # print(U)
     # print(X)
-    # plot results
+    ### plot results
     import matplotlib.pyplot as plt
     plt.figure()
     plt.plot(Xhist[:3,:NRUNS-1].T)
