@@ -1,0 +1,3 @@
+[submodule "tinympc-python"]
+	path = tinympc-python
+	url = https://github.com/TinyMPC/tinympc-python.git
