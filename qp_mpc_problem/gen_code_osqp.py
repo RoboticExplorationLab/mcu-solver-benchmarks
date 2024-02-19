@@ -49,6 +49,7 @@ def generate_osqp_solver(path):
     lineq = np.hstack([np.kron(np.ones(Nh+1), xmin), np.kron(np.ones(Nh), umin)])
     uineq = np.hstack([np.kron(np.ones(Nh+1), xmax), np.kron(np.ones(Nh), umax)])
     # - OSQP constraints
+    print(Aeq.shape, Aineq.shape)
     A = sparse.vstack([Aeq, Aineq], format='csc')
     l = np.hstack([leq, lineq])
     u = np.hstack([ueq, uineq])
@@ -62,22 +63,22 @@ def generate_osqp_solver(path):
 
     # Generate C code
     # fmt: off
-    prob.codegen(
-        path+'/generated_osqp_solver',   # Output folder for auto-generated code
-        prefix='osqp_data_',         # Prefix for filenames and C variables; useful if generating multiple problems
-        force_rewrite=True,        # Force rewrite if output folder exists?
-        parameters='vectors',      # What do we wish to update in the generated code?
-                                   # One of 'vectors' (allowing update of q/l/u through prob.update_data_vec)
-                                   # or 'matrices' (allowing update of P/A/q/l/u
-                                   # through prob.update_data_vec or prob.update_data_mat)
-        use_float=True,
-        printing_enable=False,     # Enable solver printing?
-        profiling_enable=False,    # Enable solver profiling?
-        interrupt_enable=False,    # Enable user interrupt (Ctrl-C)?
-        include_codegen_src=True,  # Include headers/sources/Makefile in the output folder,
-                                   # creating a self-contained compilable folder?
-        extension_name='pyosqp',   # Name of the generated python extension; generates a setup.py; Set None to skip
-        compile=False,             # Compile the above python extension into an importable module
-                                   # (allowing "import pyosqp")?
-    )
+    # prob.codegen(
+    #     path+'/generated_osqp_solver',   # Output folder for auto-generated code
+    #     prefix='osqp_data_',         # Prefix for filenames and C variables; useful if generating multiple problems
+    #     force_rewrite=True,        # Force rewrite if output folder exists?
+    #     parameters='vectors',      # What do we wish to update in the generated code?
+    #                                # One of 'vectors' (allowing update of q/l/u through prob.update_data_vec)
+    #                                # or 'matrices' (allowing update of P/A/q/l/u
+    #                                # through prob.update_data_vec or prob.update_data_mat)
+    #     use_float=True,
+    #     printing_enable=False,     # Enable solver printing?
+    #     profiling_enable=False,    # Enable solver profiling?
+    #     interrupt_enable=False,    # Enable user interrupt (Ctrl-C)?
+    #     include_codegen_src=True,  # Include headers/sources/Makefile in the output folder,
+    #                                # creating a self-contained compilable folder?
+    #     extension_name='pyosqp',   # Name of the generated python extension; generates a setup.py; Set None to skip
+    #     compile=False,             # Compile the above python extension into an importable module
+    #                                # (allowing "import pyosqp")?
+    # )
     # fmt: on
