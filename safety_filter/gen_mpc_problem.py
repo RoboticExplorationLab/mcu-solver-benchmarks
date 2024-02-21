@@ -163,7 +163,7 @@ def tinympc_export_data_to_c(xbar, A, B, Q, Qf, R, umin, umax, xmin, xmax, NSTAT
     f.write(coeff_d2p_list_string)
     f.close()
 
-def osqp_export_data_to_python(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
+def osqp_export_data_to_c(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     SIZE_Q = (NHORIZON) * NSTATES + (NHORIZON-1) * NINPUTS
     SIZE_LU = (NHORIZON) * NSTATES * 2 + (NHORIZON-1) * NINPUTS
 
@@ -171,7 +171,7 @@ def osqp_export_data_to_python(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     boilerplate = "#pragma once\n\n"
 
     # f = open("rand_prob_osqp_xbar.h", "w")
-    f = open('problem_data/prob_nx_'+str(NSTATES)+"/osqp_problem.h", "w")
+    f = open('osqp_teensy/lib/osqp/inc/public'+"/osqp_problem.h", "w")
     f.write(include_statement)
     f.write(boilerplate)
 
@@ -182,7 +182,7 @@ def osqp_export_data_to_python(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     f.write("#define SIZE_Q "+str(SIZE_Q)+'\n\n')
     f.write("#define SIZE_LU "+str(SIZE_LU)+'\n\n')
 
-    mR_string = export_mat_to_c("const PROGMEM OSQPFloat mQ["+str(NSTATES)+"*"+str(NSTATES)+"] ", -R)+'\n\n'
+    mR_string = export_mat_to_c("const PROGMEM OSQPFloat mR["+str(NSTATES)+"*"+str(NSTATES)+"] ", -R)+'\n\n'
     A_string = export_mat_to_c("const PROGMEM OSQPFloat A["+str(NSTATES)+"*"+str(NSTATES)+"] ", A)+'\n\n'
     B_string = export_mat_to_c("const PROGMEM OSQPFloat B["+str(NSTATES)+"*"+str(NINPUTS)+"] ", B)+'\n\n'
 
