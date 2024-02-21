@@ -158,7 +158,6 @@ for k in range(NHORIZON-1):
 # constraints.append(z[xinds[NHORIZON-1]] == np.zeros(NSTATES))
 
 problem = cp.Problem(objective,constraints)
-opts = {"verbose": False, "solver": "ECOS", "abstol": 1e-2, "max_iters": 100}
 
 # MPC loop
 np.random.seed(1234)
@@ -172,15 +171,21 @@ params["Uref"] = Uref[0:NHORIZON-1]*1
 q_param.value = update_linear_term(params)[1]  
 
 # GENERATE CODE (uncomment to generate code)
-GEN_CODE = 0
+GEN_CODE = 1
+
+opts = {"verbose": False, "max_iters": 100}
+SOLVER = "ECOS"
+# SOLVER = "SCS"
 
 if GEN_CODE:
-    cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS', solver_opts=opts)
-
-    problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
+    if SOLVER == "ECOS":
+        cpg.generate_code(problem, code_dir='generated_ecos', solver=SOLVER, solver_opts=opts)
+    if SOLVER == "SCS":
+        cpg.generate_code(problem, code_dir='generated_scs', solver=SOLVER, solver_opts=opts)
+    problem.solve(verbose=False, solver=SOLVER, max_iters=100)
     print(z.value)
 else:
-    for k in range(2):
+    for k in range(NRUNS):
         # Get measurements
         x0_param.value = Xhist[:, k]*1
 
@@ -191,8 +196,8 @@ else:
         # print(q_param.value, x0_param.value)
         
         # Solve MPC problem
-        problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
-        print(z.value)
+        problem.solve(verbose=False, solver=SOLVER, max_iters=100)
+        # print(z.value)
         # Extract results
         for j in range(NHORIZON-1):
             X[j] = z[xinds[j]].value
@@ -203,9 +208,9 @@ else:
         # Simulate system
         Xhist[:, k+1] = A @ Xhist[:, k] + B @ Uhist[:, k] + f
 
-    # print(U)
-    # print(X)
-    ### plot results
+    print(U)
+    print(X)
+    ## plot results
     import matplotlib.pyplot as plt
     plt.figure()
     plt.plot(Xhist[:3,:NRUNS-1].T)

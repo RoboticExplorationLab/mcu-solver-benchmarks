@@ -63,8 +63,10 @@ t_vec = dt * np.arange(NTOTAL)
 
 x0 = np.array([4, 2, 20, -3, 2, -4.5])
 xg = np.array([0, 0, 0, 0, 0, 0.0])
-Xref = [xg for k in range(NTOTAL)]
-Uref = [[0, 0, 10.] for _ in range(NTOTAL - 1)]
+# Xref = [xg for k in range(NTOTAL)]
+Xref = [[0, 0, 0, 0, 0, 0.0] for _ in range(NTOTAL)]
+# Uref = [[0, 0, 10.] for _ in range(NTOTAL - 1)]
+Uref = [[0, 0, 0.] for _ in range(NTOTAL - 1)]
 Xref_hrz = Xref[:NHORIZON]*1
 Uref_hrz = Uref[:NHORIZON-1]*1
 
@@ -157,7 +159,7 @@ for k in range(NHORIZON-1):
 # constraints.append(z[xinds[NHORIZON-1]] == np.zeros(NSTATES))
 
 problem = cp.Problem(objective,constraints)
-opts = {"verbose": False, "solver": "ECOS", "abstol": 1e-2, "max_iters": 100}
+opts = {"verbose": False, "solver": "SCS", "abstol": 1e-2, "max_iters": 100}
 
 # MPC loop
 np.random.seed(1234)
@@ -171,18 +173,18 @@ x0_param.value = Xhist[:, 0]*1
 GEN_CODE = 0
 
 if GEN_CODE:
-    # cpg.generate_code(problem, code_dir='SOCP_rocket_landing', solver='ECOS', solver_opts=opts)
+    cpg.generate_code(problem, code_dir='SOCP_rocket_landing_SCS', solver='SCS', solver_opts=opts)
 
-    problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
+    problem.solve(verbose=False, solver="SCS", max_iters=100)
     print(z.value)
 else:
-    for k in range(NRUNS):
+    for k in range(2):
         # Get measurements
         x0_param.value = Xhist[:, k]*1
 
         # Solve MPC problem
-        problem.solve(verbose=False, solver="ECOS", abstol=1e-2, max_iters=100)
-        # print(z.value)
+        problem.solve(verbose=False, solver="SCS", max_iters=100)
+        print(z.value)
         # Extract results
         for j in range(NHORIZON-1):
             X[j] = z[xinds[j]].value
@@ -196,16 +198,16 @@ else:
     # print(U)
     # print(X)
     ### plot results
-    import matplotlib.pyplot as plt
-    plt.figure()
-    plt.plot(Xhist[:3,:NRUNS-1].T)
-    # plt.plot(np.array(X))
-    plt.title('States')
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # plt.plot(Xhist[:3,:NRUNS-1].T)
+    # # plt.plot(np.array(X))
+    # plt.title('States')
+    # plt.show()
 
-    plt.figure()
-    plt.plot(Uhist[:,:NRUNS-1].T)
-    # plt.plot(np.array(X))
-    plt.title('Controls')
-    plt.show()
+    # plt.figure()
+    # plt.plot(Uhist[:,:NRUNS-1].T)
+    # # plt.plot(np.array(X))
+    # plt.title('Controls')
+    # plt.show()
 
