@@ -118,6 +118,8 @@ extern "C"
 
         tinytype tracking_error = 0;
 
+        unsigned long start = micros();
+
         for (int k = 0; k < NTOTAL - NHORIZON - 1; ++k)
         // for (int k=0; k < 50; k++)
         {
@@ -137,15 +139,16 @@ extern "C"
             // work.g = tiny_MatrixNxNh::Zero();
 
             // 4. Solve MPC problem
-            unsigned long start = micros();
+            // unsigned long start = micros();
             tiny_solve(&solver);
-            unsigned long end = micros();
+            // unsigned long end = micros();
 
             // std::cout << "\n<<<< SOLVE COMPLETE <<<<" << std::endl;
             // std::cout << "iterations: " << work.iter << std::endl;
             // std::cout << "controls: " << work.u.col(0).transpose().format(CleanFmt) << std::endl;
             // std::cout << std::endl;
             Serial.println("\n<<<< SOLVE COMPLETE <<<<");
+            Serial.print("time step: "); Serial.println(k);
             Serial.print("iterations: "); Serial.println(work.iter);
             // Serial.print("controls: "); Serial.println(work.u.col(0).transpose().format(CleanFmt));
             Serial.println("");
@@ -155,10 +158,13 @@ extern "C"
             x0 = x1;
             Xhist.col(k+1) = x1;
 
-            Serial.println("HI!");
 
             // std::cout << x0.transpose().format(CleanFmt) << std::endl;
         }
+
+        unsigned long end = micros();
+
+        Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds")
 
         // std::cout << Xhist.transpose() << std::endl;
 
