@@ -14,6 +14,9 @@
 #include "osqp_problem.h"
 #include "math.h"
 
+extern "C"
+{
+
 #define NTOTAL 201
 #define NRUNS (NTOTAL - NHORIZON - 1)
 #define NPOS (NSTATES / 2)
@@ -23,15 +26,15 @@
 #define LED_BUILTIN 13
 #endif
 
-float kp = 7.0;
-float kd = 3.0;
-float ki = 0.1;
+  float kp = 7.0;
+  float kd = 3.0;
+  float ki = 0.1;
 
 void add_noise(OSQPFloat x[], float var)
 {
   for (int i = 0; i < NSTATES; ++i)
   {
-    OSQPFloat noise = ((rand() / double(RAND_MAX)) - 0.5) * 2; // random -1 to 1
+    OSQPFloat noise = ((rand() / (RAND_MAX)) - 0.5) * 2; // random -1 to 1
     x[i] += noise * var;
   }
 }
@@ -45,6 +48,7 @@ void print_vector(OSQPFloat xn[], int n)
     // printf("%f, ", xn[i]);
   }
   Serial.println();
+  // printf("\n");
 }
 
 void matrix_vector_mult(int n1,
@@ -107,11 +111,11 @@ void compute_bound(OSQPFloat bnew[], OSQPFloat xn[], OSQPFloat xb, OSQPFloat ub,
   {
     bnew[i] = -xn[i]; // only the first is current state
   }
-  for (int i = (NHORIZON + 1) * NSTATES; i < (NHORIZON + 1) * NSTATES * 2; ++i)
+  for (int i = NHORIZON * NSTATES; i < NHORIZON * NSTATES * 2; ++i)
   {
     bnew[i] = xb; // bounds on x
   }
-  for (int i = (NHORIZON + 1) * NSTATES * 2; i < size; ++i)
+  for (int i = NHORIZON * NSTATES * 2; i < size; ++i)
   {
     bnew[i] = ub; // bounds on u
   }
@@ -127,81 +131,93 @@ OSQPFloat compute_norm(OSQPFloat x[], OSQPFloat x_bar[])
   return sqrt(res);
 }
 
-OSQPInt exitflag;
-OSQPFloat xk[NSTATES] = {0};
-OSQPFloat xhrz[NSTATES] = {0};
-OSQPFloat xd[NSTATES] = {0};
-OSQPFloat q_new[SIZE_Q] = {0};
-OSQPFloat l_new[SIZE_LU] = {0};
-OSQPFloat u_new[SIZE_LU] = {0};
-OSQPFloat xmin = -10000.0;
-OSQPFloat xmax = 10000;
-OSQPFloat umin = -3.0;
-OSQPFloat umax = 3;
-OSQPFloat uref[NINPUTS * (NHORIZON - 1)] = {0};
-OSQPFloat uk[NINPUTS] = {0};
-
-int main()
-{
-    // initialize LED digital pin as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  // start serial terminal
-  Serial.begin(9600);
-  while (!Serial)
-  { // wait to connect
-    continue;
-  }
-
-  std::cout << "Hello, World!" << std::endl;
-
   OSQPInt exitflag;
-  srand(1);
-  // add_noise(xk, 0.1);
-  print_vector(xk, NSTATES);
+  OSQPFloat xk[NSTATES] = {0};
+  OSQPFloat xhrz[NSTATES] = {0};
+  OSQPFloat xd[NSTATES] = {0};
+  OSQPFloat q_new[SIZE_Q] = {0};
+  OSQPFloat l_new[SIZE_LU] = {0};
+  OSQPFloat u_new[SIZE_LU] = {0};
+  OSQPFloat xmin = -1.5;
+  OSQPFloat xmax = 1.5;
+  OSQPFloat umin = -3.0;
+  OSQPFloat umax = 3;
+  OSQPFloat uref[NINPUTS * (NHORIZON - 1)] = {0};
+  OSQPFloat uk[NINPUTS] = {0};
 
-  for (int step = 0; step < 2; step++)
+  int main()
   {
-    memcpy(xhrz, xk, NSTATES * (sizeof(OSQPFloat)));
-    // Rollout the nominal system
-    for (int i = 0; i < NHORIZON - 1; ++i)
-    {
-      float temp = 2.0 * sin(1 * dt * (step+i));
-      for (int j = 0; j < NPOS; ++j)
-      {
-        xd[j] = temp;
-        xd[j+NPOS] = 0.0;
-      }
-      print_vector(xd, NSTATES);
-      print_vector(xhrz, NSTATES);
-      // pid controller
-      for (int j = 0; j < NINPUTS; ++j)
-      {
-        uref[i*NINPUTS+j] = kp * (xd[j] - xk[j]) + kd * (xd[j + NPOS] - xk[j + NPOS]);
-      }
-      print_vector(uref+i*NINPUTS, NINPUTS);
-      
-      system_dynamics(xd, xhrz, uref+i*NINPUTS, A, B);
-      memcpy(xhrz, xd, NSTATES * (sizeof(OSQPFloat)));
+    // initialize LED digital pin as an output.
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    // start serial terminal
+    Serial.begin(9600);
+    while (!Serial)
+    { // wait to connect
+      continue;
     }
-    memcpy(uk, uref, NINPUTS * (sizeof(OSQPFloat)));
 
-    if (0) {  // enable safety filter
-      compute_bound(l_new, xk, xmin, umin, SIZE_LU);
-      compute_bound(u_new, xk, xmax, umax, SIZE_LU);
-      compute_q(q_new, mR, uref);
-      osqp_update_data_vec(&osqp_data_solver, q_new, l_new, u_new);
-      unsigned long start = micros();
-      exitflag = osqp_solve(&osqp_data_solver);
-      unsigned long end = micros();
-      memcpy(uk, (osqp_data_solver.solution->x) + NHORIZON * NSTATES, NINPUTS * (sizeof(OSQPFloat)));
+    std::cout << "Start OSQP filtering!" << std::endl;
+
+    OSQPInt exitflag;
+    srand(1);
+    // add_noise(xk, 0.1);
+    // print_vector(xk, NSTATES);
+
+    for (int step = 0; step < NRUNS; step++)
+    {
+      memcpy(xhrz, xk, NSTATES * (sizeof(OSQPFloat)));
+      // Rollout the nominal system
+      for (int i = 0; i < NHORIZON - 1; ++i)
+      {
+        float temp = 2.0 * sin(1 * dt * (step + i));
+        for (int j = 0; j < NPOS; ++j)
+        {
+          xd[j] = temp;
+          xd[j + NPOS] = 0.0;
+        }
+        // print_vector(xd, NSTATES);
+        // print_vector(xhrz, NSTATES);
+        // pid controller
+        for (int j = 0; j < NINPUTS; ++j)
+        {
+          uref[i * NINPUTS + j] = kp * (xd[j] - xhrz[j]) + kd * (xd[j + NPOS] - xhrz[j + NPOS]);
+          // printf("xd[j] = %f, xk[j] = %f, xd[j + NPOS] = %f, xk[j + NPOS] = %f\n", xd[j], xk[j], xd[j + NPOS], xk[j + NPOS]);
+        }
+        // print_vector(uref+i*NINPUTS, NINPUTS);
+
+        system_dynamics(xd, xhrz, uref + i * NINPUTS, A, B);
+        memcpy(xhrz, xd, NSTATES * (sizeof(OSQPFloat)));
+      }
+      memcpy(uk, uref, NINPUTS * (sizeof(OSQPFloat)));
+
+      if (1)
+      { // enable safety filter
+        compute_bound(l_new, xk, xmin, umin, SIZE_LU);
+        compute_bound(u_new, xk, xmax, umax, SIZE_LU);
+        compute_q(q_new, mR, uref);
+        osqp_update_data_vec(&osqp_data_solver, q_new, l_new, u_new);
+
+        unsigned long start = micros();
+        exitflag = osqp_solve(&osqp_data_solver);
+        unsigned long end = micros();
+        if (exitflag != 0)
+        {
+          printf("OSQP failed to solve the problem!\n");
+        }
+
+        // BENCHMARKING DATA
+        printf("%10d %10.6d\n", osqp_data_solver.info->iter, end - start);
+
+        memcpy(uk, (osqp_data_solver.solution->x) + NHORIZON * NSTATES, NINPUTS * (sizeof(OSQPFloat)));
       }
 
-    system_dynamics(xd, xk, uk, A, B);
-    // print_vector(xd, NSTATES);
-    memcpy(xk, xd, NSTATES * (sizeof(OSQPFloat)));
-    std::cout << "Step: " << step << std::endl;
-    print_vector(xk, NSTATES);
-    print_vector(uk, NINPUTS);
+      system_dynamics(xd, xk, uk, A, B);
+      // print_vector(xd, NSTATES);
+      memcpy(xk, xd, NSTATES * (sizeof(OSQPFloat)));
+      // std::cout << "Step: " << step << std::endl;
+      print_vector(xk, NSTATES);
+      print_vector(uk, NINPUTS);
+    }
   }
-}
+} // extern "C"
