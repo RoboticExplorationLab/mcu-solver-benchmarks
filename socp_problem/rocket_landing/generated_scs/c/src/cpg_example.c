@@ -18,16 +18,16 @@ static int i;
 #define NTOTAL 301
 #define NRUNS (NTOTAL - NHORIZON - 1)
 
-// void add_noise(double x[])
-// {
-//   for (int i = 0; i < NSTATES; ++i)
-//   {
-//     double noise = (double(rand() / RAND_MAX) - 0.5)*2 * 0.01;
-//     x[i] += noise;
-//   }
-// }
+void add_noise(float x[], float var)
+{
+  for (int i = 0; i < NSTATES; ++i)
+  {
+    float noise = ((rand() / RAND_MAX) - 0.5) * 2; // random -1 to 1
+    x[i] += noise * var;
+  }
+}
 
-void print_vector(double xn[], int n)
+void print_vector(float xn[], int n)
 {
   for (int i = 0; i < n; ++i)
   {
@@ -39,9 +39,9 @@ void print_vector(double xn[], int n)
 
 void matrix_vector_mult(int n1,
                         int n2,
-                        double matrix[],
-                        double vector[],
-                        double result_vector[])
+                        float matrix[],
+                        float vector[],
+                        float result_vector[])
 {
   // n1 is rows of matrix
   // n2 is cols of matrix, or vector
@@ -57,9 +57,9 @@ void matrix_vector_mult(int n1,
 
 void matrix_vector_reset_mult(int n1,
                               int n2,
-                              double matrix[],
-                              double vector[],
-                              double result_vector[])
+                              float matrix[],
+                              float vector[],
+                              float result_vector[])
 {
   // n1 is rows of matrix
   // n2 is cols of matrix, or vector
@@ -74,7 +74,7 @@ void matrix_vector_reset_mult(int n1,
   }
 }
 
-void system_dynamics(double xn[], double x[], double u[], double A[], double B[], double f[])
+void system_dynamics(float xn[], float x[], float u[], float A[], float B[], float f[])
 {
   matrix_vector_reset_mult(NSTATES, NSTATES, A, x, xn);
   matrix_vector_mult(NSTATES, NINPUTS, B, u, xn);
@@ -84,9 +84,9 @@ void system_dynamics(double xn[], double x[], double u[], double A[], double B[]
   }
 }
 
-double compute_norm(double x[], double x_bar[])
+float compute_norm(float x[], float x_bar[])
 {
-  double res = 0.0f;
+  float res = 0.0f;
   for (int i = 0; i < NSTATES; ++i)
   {
     res += (x[i] - x_bar[i]) * (x[i] - x_bar[i]);
@@ -95,31 +95,41 @@ double compute_norm(double x[], double x_bar[])
 }
 
 // May need to save in workspace
-const double A[] = {1.0, 0.0, 0.0, 0.05, 0.0, 0.0,
+const float A[] = {1.0, 0.0, 0.0, 0.05, 0.0, 0.0,
                    0.0, 1.0, 0.0, 0.0, 0.05, 0.0,
                    0.0, 0.0, 1.0, 0.0, 0.0, 0.05,
                    0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
                    0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
                    0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
-const double B[] = {0.000125, 0.0, 0.0,
+const float B[] = {0.000125, 0.0, 0.0,
                    0.0, 0.000125, 0.0,
                    0.0, 0.0, 0.000125,
                    0.005, 0.0, 0.0,
                    0.0, 0.005, 0.0,
                    0.0, 0.0, 0.005};
-const double f[] = {0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905};
-const double Q_single = 1e3;
-const double xref0[] = {4, 2, 20, -3, 2, -4.5};
+const float f[] = {0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905};
+const float Q_single = 1e3;
+const float xref0[] = {4, 2, 20, -3, 2, -4.5};
 
-double xn[NSTATES] = {0};
-double x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
-double u[NINPUTS] = {0};
-double temp = 0;
+float xn[NSTATES] = {0};
+float x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
+float u[NINPUTS] = {0};
+float temp = 0;
 
 int main(int argc, char *argv[]){
+  // UPDATE SOLVER OPTIONS FIRST
+
+  // for ecos
   // cpg_set_solver_abstol(1e-2);
   // cpg_set_solver_reltol(1e-2);
+  // cpg_set_solver_maxit(100);
 
+  // for scs
+  // cpg_set_solver_eps_abs(1e-2);
+  // cpg_set_solver_eps_rel(1e-2);
+  // cpg_set_solver_max_iters(100);
+
+  srand(1);
   for (int k = 0; k < NRUNS; ++k) {
     //// Update current measurement
     for (int i = 0; i < NSTATES; ++i)
@@ -155,8 +165,8 @@ int main(int argc, char *argv[]){
     cpg_solve();
     clock_t end = clock();
     // printf("%d\n", end-start);
-    double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC; 
-    // printf("cpu_time_used = %f\n", cpu_time_used);
+    float cpu_time_used = ((float) (end - start)) / CLOCKS_PER_SEC; 
+    printf("cpu_time_used = %f\n", cpu_time_used);
 
     // Get data from the result
     for (i=NSTATES; i<NSTATES+NHORIZON; i++) {
@@ -171,15 +181,13 @@ int main(int argc, char *argv[]){
     print_vector(xn, NSTATES);
 
     // Update the state
-    memcpy(x, xn, NSTATES * (sizeof(double)));
+    memcpy(x, xn, NSTATES * (sizeof(float)));
+    // print_vector(x, NSTATES);
+    add_noise(x, 0.01);
+    // print_vector(x, NSTATES);
 
     // Print objective function value
     // printf("obj = %f\n", CPG_Result.info->obj_val);
-
-    //// Print primal solution
-    // for(i=0; i<186; i++) {
-    //   printf("var2[%d] = %f\n", i, CPG_Result.prim->var2[i]);
-    // }
   }
   return 0;
 }
