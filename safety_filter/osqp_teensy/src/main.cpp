@@ -34,7 +34,7 @@ void add_noise(OSQPFloat x[], float var)
 {
   for (int i = 0; i < NSTATES; ++i)
   {
-    OSQPFloat noise = ((rand() / (RAND_MAX)) - 0.5) * 2; // random -1 to 1
+    OSQPFloat noise = ((rand() / double(RAND_MAX)) - 0.5) * 2; // random -1 to 1
     x[i] += noise * var;
   }
 }
@@ -212,6 +212,9 @@ OSQPFloat compute_norm(OSQPFloat x[], OSQPFloat x_bar[])
         memcpy(uk, (osqp_data_solver.solution->x) + NHORIZON * NSTATES, NINPUTS * (sizeof(OSQPFloat)));
       }
 
+      // print_vector(uk, NINPUTS);
+      // print_vector(xk, NSTATES);
+      // print_vector(xd, NSTATES);
       system_dynamics(xd, xk, uk, A, B);
       // print_vector(xd, NSTATES);
       memcpy(xk, xd, NSTATES * (sizeof(OSQPFloat)));
