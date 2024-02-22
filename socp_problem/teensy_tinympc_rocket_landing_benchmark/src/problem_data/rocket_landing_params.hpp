@@ -2,7 +2,7 @@
 
 #include "types.hpp"
 
-tinytype Adyn_data[NSTATES * NSTATES] = {
+const PROGMEM tinytype Adyn_data[NSTATES * NSTATES] = {
 	1.000000f, 0.000000f, 0.000000f, 0.050000f, 0.000000f, 0.000000f, 
 	0.000000f, 1.000000f, 0.000000f, 0.000000f, 0.050000f, 0.000000f, 
 	0.000000f, 0.000000f, 1.000000f, 0.000000f, 0.000000f, 0.050000f, 
@@ -11,7 +11,7 @@ tinytype Adyn_data[NSTATES * NSTATES] = {
 	0.000000f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 1.000000f
 };
 
-tinytype Bdyn_data[NSTATES * NINPUTS] = {
+const PROGMEM tinytype Bdyn_data[NSTATES * NINPUTS] = {
 	0.000125f, 0.000000f, 0.000000f, 
 	0.000000f, 0.000125f, 0.000000f, 
 	0.000000f, 0.000000f, 0.000125f, 
@@ -20,21 +20,21 @@ tinytype Bdyn_data[NSTATES * NINPUTS] = {
 	0.000000f, 0.000000f, 0.005000f
 };
 
-tinytype fdyn_data[NSTATES] = {0.000000f, 0.000000f, -0.012263f, 0.000000f, 0.000000f, -0.490500f};
+const PROGMEM tinytype fdyn_data[NSTATES] = {0.000000f, 0.000000f, -0.012263f, 0.000000f, 0.000000f, -0.490500f};
 
-tinytype Q_data[NSTATES] = {100.000000f, 100.000000f, 100.000000f, 100.000000f, 100.000000f, 100.000000f};
+const PROGMEM tinytype Q_data[NSTATES] = {100.000000f, 100.000000f, 100.000000f, 100.000000f, 100.000000f, 100.000000f};
 
-tinytype R_data[NINPUTS] = {2.000000f, 2.000000f, 2.000000f};
+const PROGMEM tinytype R_data[NINPUTS] = {2.000000f, 2.000000f, 2.000000f};
 
-tinytype rho_value = 1.0;
+const PROGMEM tinytype rho_value = 1.0;
 
-tinytype Kinf_data[NINPUTS*NSTATES] = {
+const PROGMEM tinytype Kinf_data[NINPUTS*NSTATES] = {
 	6.830684f, 0.000000f, 0.000000f, 13.537796f, 0.000000f, 0.000000f, 
 	0.000000f, 6.830684f, 0.000000f, 0.000000f, 13.537796f, 0.000000f, 
 	0.000000f, 0.000000f, 6.830684f, 0.000000f, 0.000000f, 13.537796f
 };
 
-tinytype Pinf_data[NSTATES*NSTATES] = {
+const PROGMEM tinytype Pinf_data[NSTATES*NSTATES] = {
 	3963.818612f, 0.000000f, 0.000000f, 2828.869032f, 0.000000f, 0.000000f, 
 	0.000000f, 3963.818612f, 0.000000f, 0.000000f, 2828.869032f, 0.000000f, 
 	0.000000f, 0.000000f, 3963.818612f, 0.000000f, 0.000000f, 2828.869032f, 
@@ -43,13 +43,13 @@ tinytype Pinf_data[NSTATES*NSTATES] = {
 	0.000000f, 0.000000f, 2828.869032f, 0.000000f, 0.000000f, 5585.840134f
 };
 
-tinytype Quu_inv_data[NINPUTS*NINPUTS] = {
+const PROGMEM tinytype Quu_inv_data[NINPUTS*NINPUTS] = {
 	0.466582f, 0.000000f, 0.000000f, 
 	0.000000f, 0.466582f, 0.000000f, 
 	0.000000f, 0.000000f, 0.466582f
 };
 
-tinytype AmBKt_data[NSTATES*NSTATES] = {
+const PROGMEM tinytype AmBKt_data[NSTATES*NSTATES] = {
 	0.999146f, 0.000000f, 0.000000f, -0.034153f, 0.000000f, 0.000000f, 
 	0.000000f, 0.999146f, 0.000000f, 0.000000f, -0.034153f, 0.000000f, 
 	0.000000f, 0.000000f, 0.999146f, 0.000000f, 0.000000f, -0.034153f, 
@@ -58,7 +58,7 @@ tinytype AmBKt_data[NSTATES*NSTATES] = {
 	0.000000f, 0.000000f, 0.048308f, 0.000000f, 0.000000f, 0.932311f
 };
 
-tinytype APf_data[NSTATES] = {0.000000f, 0.000000f, -1340.180184f, 0.000000f, 0.000000f, -2656.115579f};
+const PROGMEM tinytype APf_data[NSTATES] = {0.000000f, 0.000000f, -1340.180184f, 0.000000f, 0.000000f, -2656.115579f};
 
-tinytype BPf_data[NINPUTS] = {0.000000f, 0.000000f, -14.052239f};
+const PROGMEM tinytype BPf_data[NINPUTS] = {0.000000f, 0.000000f, -14.052239f};
 

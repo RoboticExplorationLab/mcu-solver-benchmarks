@@ -16,7 +16,7 @@
 
 #include "admm.hpp"
 #include "problem_data/rocket_landing_params_20hz.hpp"
-#include "trajectory_data/rocket_landing_ref_traj_20hz.hpp"
+#include "trajectory_data/rocket_landing_ref_traj_20hz_m.hpp"
 
 #include "Arduino.h"
 
@@ -25,9 +25,16 @@ Eigen::IOFormat SaveData(4, 0, ", ", "\n");
 
 extern "C"
 {
+    static TinyCache cache;
+    static TinySettings settings;
+    static TinyBounds bounds;
+    static TinySocs socs;
+    static TinyWorkspace work;
+    static TinySolver solver{&settings, &cache, &work};
 
     void setup()
     {
+        
         srand(123);
         Serial.begin(9600);
         while (!Serial)
@@ -35,15 +42,9 @@ extern "C"
             continue;
         }
         Serial.println("Serial initialized");
-        TinyBounds bounds;
-        TinySocs socs;
-        TinyWorkspace work;
+
         work.bounds = &bounds;
         work.socs = &socs;
-
-        TinyCache cache;
-        TinySettings settings;
-        TinySolver solver{&settings, &cache, &work};
 
         /* Map data from problem_data (array in row-major order) */
 
@@ -105,6 +106,21 @@ extern "C"
         Matrix<tinytype, NSTATES, NTOTAL-NHORIZON-1> Xhist;
         Matrix<tinytype, NSTATES, NTOTAL> Xref_total = Eigen::Map<Matrix<tinytype, NSTATES, NTOTAL, Eigen::ColMajor>>(Xref_data);
         Matrix<tinytype, NINPUTS, NTOTAL-1> Uref_total = Eigen::Map<Matrix<tinytype, NINPUTS, NTOTAL-1, Eigen::ColMajor>>(Uref_data);
+        /*
+        Eigen::Matrix<tinytype, NSTATES, 100> Xref_truncated;
+        for (int i = 0; i < NSTATES; ++i) {
+            for (int j = 0; j < 100; ++j) {
+                Xref_truncated(i, j) = Xref_total(i, j);
+            }
+        }
+        
+        Eigen::Matrix<tinytype, NINPUTS, 100 - 1> Uref_truncated;
+        for (int i = 0; i < NINPUTS; ++i) {
+            for (int j = 0; j < 100 - 1; ++j) {
+                Uref_truncated(i, j) = Uref_total(i, j);
+            }
+        }
+        */
         work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, 0);
         work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
         work.p.col(NHORIZON-1) = -cache.Pinf*work.Xref.col(NHORIZON-1);
@@ -145,7 +161,7 @@ extern "C"
             x0 = x1;
             Xhist.col(k+1) = x1;
 
-            // std::cout << x0.transpose().format(CleanFmt) << std::endl;
+            std::cout << x0.transpose().format(CleanFmt) << std::endl;
         }
 
         // std::cout << Xhist.transpose() << std::endl;
