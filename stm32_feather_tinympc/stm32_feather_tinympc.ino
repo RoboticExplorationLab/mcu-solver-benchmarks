@@ -147,6 +147,7 @@ extern "C"
             // 3. Reset dual variables if needed
             // work.y = tiny_MatrixNuNhm1::Zero();
             // work.g = tiny_MatrixNxNh::Zero();
+            // reset_dual(&solver);
 
             // 4. Solve MPC problem
             // unsigned long start = micros();
