@@ -127,8 +127,9 @@ uinds = [inds[NSTATES:, i] for i in range(NHORIZON - 1)]
 
 q_param = cp.Parameter((NN, 1), value =np.zeros((NN, 1)))
 P, q_param.value = update_linear_term(params)  # P is unchanged
+Psqrt = scipy.linalg.sqrtm(P)
 
-objective = cp.Minimize(0.5 * cp.sum_squares(P @ z) + q_param.T @ z)
+objective = cp.Minimize(0.5 * cp.sum_squares(Psqrt @ z) + q_param.T @ z)
 #objective = cp.Minimize(0.5 * cp.quad_form(z, P_param) + q_param.T @ z)
 constraints = []
 
