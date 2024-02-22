@@ -1,0 +1,12 @@
+{
+    "name": "osqp",
+    "version": "0.0.0",
+    "build": {
+        "includeDir": ".",
+        "flags": [
+            "-I inc",
+            "-I inc/public",
+            "-I inc/private"
+        ]
+    }
+}
