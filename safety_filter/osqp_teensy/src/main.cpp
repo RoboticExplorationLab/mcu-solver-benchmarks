@@ -34,7 +34,7 @@ void add_noise(OSQPFloat x[], float var)
 {
   for (int i = 0; i < NSTATES; ++i)
   {
-    OSQPFloat noise = ((rand() / (RAND_MAX)) - 0.5) * 2; // random -1 to 1
+    OSQPFloat noise = ((rand() / double(RAND_MAX)) - 0.5) * 2; // random -1 to 1
     x[i] += noise * var;
   }
 }
@@ -140,8 +140,8 @@ OSQPFloat compute_norm(OSQPFloat x[], OSQPFloat x_bar[])
   OSQPFloat u_new[SIZE_LU] = {0};
   OSQPFloat xmin = -1.5;
   OSQPFloat xmax = 1.5;
-  OSQPFloat umin = -3.0;
-  OSQPFloat umax = 3;
+  OSQPFloat umin = -2.0;
+  OSQPFloat umax = 2;
   OSQPFloat uref[NINPUTS * (NHORIZON - 1)] = {0};
   OSQPFloat uk[NINPUTS] = {0};
 
@@ -161,7 +161,7 @@ OSQPFloat compute_norm(OSQPFloat x[], OSQPFloat x_bar[])
 
     OSQPInt exitflag;
     srand(1);
-    // add_noise(xk, 0.1);
+    add_noise(xk, 0.1);
     // print_vector(xk, NSTATES);
 
     for (int step = 0; step < NRUNS; step++)
@@ -212,6 +212,9 @@ OSQPFloat compute_norm(OSQPFloat x[], OSQPFloat x_bar[])
         memcpy(uk, (osqp_data_solver.solution->x) + NHORIZON * NSTATES, NINPUTS * (sizeof(OSQPFloat)));
       }
 
+      // print_vector(uk, NINPUTS);
+      // print_vector(xk, NSTATES);
+      // print_vector(xd, NSTATES);
       system_dynamics(xd, xk, uk, A, B);
       // print_vector(xd, NSTATES);
       memcpy(xk, xd, NSTATES * (sizeof(OSQPFloat)));

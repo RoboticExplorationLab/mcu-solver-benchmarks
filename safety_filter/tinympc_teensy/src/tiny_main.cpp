@@ -38,18 +38,19 @@ extern "C"
 		// std::cout << tiny_data_solver.cache->AmBKt.format(CleanFmt) << std::endl;
 		// std::cout << tiny_data_solver.work->Adyn.format(CleanFmt) << std::endl;
 		tiny_data_solver.settings->en_state_bound = 1;
-		tiny_data_solver.settings->max_iter = 1000;
+		tiny_data_solver.settings->max_iter = 500;
 
 		for (int i = 0; i < NHORIZON - 1; i++)
 		{
-			tiny_data_solver.work->x_min.col(i) = -1.5 * tiny_VectorNx::Ones();
-			tiny_data_solver.work->x_max.col(i) = 1.5 * tiny_VectorNx::Ones();
-			// tiny_data_solver.work->u_min.col(i) << -3, -3, -1;
-			// tiny_data_solver.work->u_max.col(i) << 1, 1, 1;
+			// tiny_data_solver.work->x_min.col(i) = -1.5 * tiny_VectorNx::Ones();
+			// tiny_data_solver.work->x_max.col(i) = 1.5 * tiny_VectorNx::Ones();
+			// tiny_data_solver.work->u_min.col(i) = -2.0 * tiny_VectorNu::Ones();
+			// tiny_data_solver.work->u_max.col(i) = 2.0 * tiny_VectorNu::Ones();
 		}
 
 		srand(1);
 		xk = tiny_VectorNx::Random() * 0.1;
+		// xk << 0.0, 0.0, 0.0, 0.0, 0, 0;
 
 		for (int step = 0; step < NRUNS; step++)
 		{
