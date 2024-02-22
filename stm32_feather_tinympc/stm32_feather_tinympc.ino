@@ -16,7 +16,7 @@
 
 #include "src/admm.hpp"
 #include "problem_data/rocket_landing_params_20hz.hpp"
-#include "trajectory_data/rocket_landing_ref_traj_20hz.hpp"
+// #include "trajectory_data/rocket_landing_ref_traj_20hz.hpp"
 
 #include "Arduino.h"
 
@@ -100,24 +100,30 @@ extern "C"
         settings.en_input_soc = 1;
 
         //////// Initialize other workspace values automatically
-        // reset_problem(&solver);
+        reset_problem(&solver);
 
         tiny_VectorNx x0, x1; // current and next simulation states
+        tiny_VectorNx xinit, xg; // initial and goal states
 
         // Map data from trajectory_data
-        Matrix<tinytype, NSTATES, NTOTAL-NHORIZON-1> Xhist;
-        Matrix<tinytype, NSTATES, NTOTAL> Xref_total = Eigen::Map<Matrix<tinytype, NSTATES, NTOTAL, Eigen::ColMajor>>(Xref_data);
-        Matrix<tinytype, NINPUTS, NTOTAL-1> Uref_total = Eigen::Map<Matrix<tinytype, NINPUTS, NTOTAL-1, Eigen::ColMajor>>(Uref_data);
-        work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, 0);
-        work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
+        // Matrix<tinytype, NSTATES, NTOTAL> Xref_total = Eigen::Map<Matrix<tinytype, NSTATES, NTOTAL, Eigen::ColMajor>>(Xref_data);
+        // Matrix<tinytype, NINPUTS, NTOTAL-1> Uref_total = Eigen::Map<Matrix<tinytype, NINPUTS, NTOTAL-1, Eigen::ColMajor>>(Uref_data);
+        // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, 0);
+        // work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
+        
+        // Initial state
+        xinit << 4, 2, 20, 0, 0, 0;
+        xg << 0, 0, 0, 0, 0, 0;
+        x0 = xinit;
+
+        for (int i=0; i<NHORIZON; i++) {
+            work.Xref.col(i) = (xinit - xg)*(1 - tinytype(i)/NTOTAL);
+            work.Uref.col(i)(2) = 10;
+        }
         work.p.col(NHORIZON-1) = -cache.Pinf*work.Xref.col(NHORIZON-1);
 
-        // Initial state
-        x0 = work.Xref.col(0);
-        Xhist.col(0) = x0;
 
         tinytype tracking_error = 0;
-
         unsigned long start = micros();
 
         for (int k = 0; k < NTOTAL - NHORIZON - 1; ++k)
@@ -131,8 +137,12 @@ extern "C"
             work.x.col(0) = x0;
 
             // 2. Update reference
-            work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, k);
-            work.Uref = Uref_total.block<NINPUTS, NHORIZON-1>(0, k);
+            for (int i=0; i<NHORIZON; i++) {
+                work.Xref.col(i) = (xinit - xg)*(1 - tinytype(i+k)/NTOTAL);
+                // work.Uref.col(i)(2) = 10 // uref stays constant
+            }
+            // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, k);
+            // work.Uref = Uref_total.block<NINPUTS, NHORIZON-1>(0, k);
 
             // 3. Reset dual variables if needed
             // work.y = tiny_MatrixNuNhm1::Zero();
@@ -156,18 +166,11 @@ extern "C"
             // 5. Simulate forward
             x1 = work.Adyn * x0 + work.Bdyn * work.u.col(0) + work.fdyn;
             x0 = x1;
-            Xhist.col(k+1) = x1;
-
-
-            // std::cout << x0.transpose().format(CleanFmt) << std::endl;
         }
 
         unsigned long end = micros();
 
-        Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds")
-
-        // std::cout << Xhist.transpose() << std::endl;
-
+        Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds");
     }
 
 } /* extern "C" */
