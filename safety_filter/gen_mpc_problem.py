@@ -171,7 +171,7 @@ def osqp_export_data_to_c(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     boilerplate = "#pragma once\n\n"
 
     # f = open("rand_prob_osqp_xbar.h", "w")
-    f = open('osqp_teensy/lib/osqp/inc/public'+"/osqp_problem.h", "w")
+    f = open('osqp_teensy/src'+"/osqp_problem.h", "w")
     f.write(include_statement)
     f.write(boilerplate)
 
