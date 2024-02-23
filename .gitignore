@@ -1,6 +1,10 @@
 # Files from embedded code generators
 tinympc_generated/
 osqp_generated/
+tinympc_*/lib/tinympc/glob_opts.hpp
+tinympc_*/src/tiny_data_workspace.cpp
+osqp_*/lib/osqp/inc/osqp_configure.h
+osqp_*/src/osqp_data_workspace.c
 
 # Project-specific files
 # random_problems
