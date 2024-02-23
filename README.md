@@ -21,9 +21,14 @@ Benchmarking solvers on microcontrollers (MCU), within TinyMPC project
 
 * Problem
   * Random QP-MPC with input constraints
+  * Safety filter
+  * Rocket landing
 * Solver
-  * OSQP
-  * TinyMPC
+  * HPIPM (safety filter/random QP-MPC)
+  * OSQP (safety filter/random QP-MPC)
+  * ECOS (all problems)
+  * SCS (all problems)
+  * TinyMPC (all problems)
 * MCU
   * STM32 (Adafruit feather board)
   * Teensy
