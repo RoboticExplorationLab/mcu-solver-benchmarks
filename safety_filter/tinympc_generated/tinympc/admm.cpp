@@ -17,7 +17,7 @@ extern "C"
         for (int i = NHORIZON - 2; i >= 0; i--)
         {
             (solver->work->d.col(i)).noalias() = solver->cache->Quu_inv * (solver->work->Bdyn.transpose() * solver->work->p.col(i + 1) + solver->work->r.col(i));
-            (solver->work->p.col(i)).noalias() = solver->work->q.col(i) + solver->cache->AmBKt.lazyProduct(solver->work->p.col(i + 1)) - (solver->cache->Kinf.transpose()).lazyProduct(solver->work->r.col(i)); 
+            (solver->work->p.col(i)).noalias() = solver->work->q.col(i) + solver->cache->AmBKt.lazyProduct(solver->work->p.col(i + 1)) - (solver->cache->Kinf.transpose()).lazyProduct(solver->work->r.col(i)); // + solver->cache->coeff_d2p * solver->work->d.col(i); // coeff_d2p always appears to be zeros (faster to comment out)
         }
     }
 
@@ -76,8 +76,8 @@ extern "C"
      */
     void update_linear_cost(TinySolver *solver)
     {
-        solver->work->r = -(solver->work->Uref.array().colwise() * solver->work->R.array()); // Uref = 0 so commented out for speed up. Need to uncomment if using Uref
-        (solver->work->r).noalias() -= solver->cache->rho * (solver->work->znew - solver->work->y);
+        // solver->work->r = -(solver->Uref.array().colwise() * solver->work->r.array()); // Uref = 0 so commented out for speed up. Need to uncomment if using Uref
+        solver->work->r = -solver->cache->rho * (solver->work->znew - solver->work->y);
         solver->work->q = -(solver->work->Xref.array().colwise() * solver->work->Q.array());
         (solver->work->q).noalias() -= solver->cache->rho * (solver->work->vnew - solver->work->g);
         solver->work->p.col(NHORIZON - 1) = -(solver->work->Xref.col(NHORIZON - 1).transpose().lazyProduct(solver->cache->Pinf));
@@ -112,10 +112,13 @@ extern "C"
     {
         // Initialize variables
         solver->work->status = 11; // TINY_UNSOLVED
-        solver->work->iter = 0;
+        solver->work->iter = 1;
 
         for (int i = 0; i < solver->settings->max_iter; i++)
         {
+
+            solver->work->iter = i + 1;
+
             // Solve linear system with Riccati and roll out to get new trajectory
             forward_pass(solver);
 
@@ -140,8 +143,6 @@ extern "C"
 
             backward_pass_grad(solver);
 
-            solver->work->iter = i + 1;
-            
             // std::cout << solver->work->primal_residual_state << std::endl;
             // std::cout << solver->work->dual_residual_state << std::endl;
             // std::cout << solver->work->primal_residual_input << std::endl;

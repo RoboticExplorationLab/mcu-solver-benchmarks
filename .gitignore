@@ -1,3 +1,6 @@
+# Files from embedded code generators
+tinympc_generated/*
+
 # Project-specific files
 # random_problems
 .vscode
