@@ -209,7 +209,9 @@ extern "C"
 
         // BENCHMARKING DATA
         // printf("%10d %10.6d\n", osqp_data_solver.info->iter, end - start);
-				Serial.print(osqp_data_solver.info->iter); Serial.print(" "); Serial.println(end-start);
+				// Serial.print(abs((osqp_data_solver.work->x.col(1) - osqp_data_solver.work->Xref.col(1)).norm())); Serial.print(" ");
+        Serial.print(osqp_data_solver.info->iter); Serial.print(" ");
+        Serial.println(end-start);
 
         memcpy(uk, (osqp_data_solver.solution->x) + NHORIZON * NSTATES, NINPUTS * (sizeof(OSQPFloat)));
       }

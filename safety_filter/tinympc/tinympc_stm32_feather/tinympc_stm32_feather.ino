@@ -75,7 +75,9 @@ extern "C"
 
 				// BENCHMARKING DATA
 				printf("%10d %10.6d\n", tiny_data_solver.work->iter, end - start);
-				Serial.print(tiny_data_solver.work->iter); Serial.print(" "); Serial.println(end-start);
+				// Serial.print(abs((tiny_data_solver.work->x.col(1) - tiny_data_solver.work->Xref.col(1)).norm()));
+				Serial.print(" "); Serial.print(tiny_data_solver.work->iter); Serial.print(" ");
+				Serial.println(end-start);
 
 				uk = tiny_data_solver.work->u.col(0);
 
