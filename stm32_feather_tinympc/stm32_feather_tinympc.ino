@@ -16,7 +16,7 @@
 
 #include "src/admm.hpp"
 #include "problem_data/rocket_landing_params_20hz.hpp"
-#include "trajectory_data/rocket_landing_ref_traj_20hz.hpp"
+// #include "trajectory_data/rocket_landing_ref_traj_20hz.hpp"
 
 #include "Arduino.h"
 
@@ -100,30 +100,35 @@ extern "C"
         settings.en_input_soc = 1;
 
         //////// Initialize other workspace values automatically
-        // reset_problem(&solver);
+        reset_problem(&solver);
 
         tiny_VectorNx x0, x1; // current and next simulation states
+        tiny_VectorNx xinit, xg; // initial and goal states
 
         // Map data from trajectory_data
-        Matrix<tinytype, NSTATES, NTOTAL-NHORIZON-1> Xhist;
-        Matrix<tinytype, NSTATES, NTOTAL> Xref_total = Eigen::Map<Matrix<tinytype, NSTATES, NTOTAL, Eigen::ColMajor>>(Xref_data);
-        Matrix<tinytype, NINPUTS, NTOTAL-1> Uref_total = Eigen::Map<Matrix<tinytype, NINPUTS, NTOTAL-1, Eigen::ColMajor>>(Uref_data);
-        work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, 0);
-        work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
+        // Matrix<tinytype, NSTATES, NTOTAL> Xref_total = Eigen::Map<Matrix<tinytype, NSTATES, NTOTAL, Eigen::ColMajor>>(Xref_data);
+        // Matrix<tinytype, NINPUTS, NTOTAL-1> Uref_total = Eigen::Map<Matrix<tinytype, NINPUTS, NTOTAL-1, Eigen::ColMajor>>(Uref_data);
+        // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, 0);
+        // work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
+        
+        // Initial state
+        xinit << 4, 2, 20, 0, 0, 0;
+        xg << 0, 0, 0, 0, 0, 0;
+        x0 = xinit;
+
+        for (int i=0; i<NHORIZON; i++) {
+            work.Xref.col(i) = (xinit - xg)*(1 - tinytype(i)/NTOTAL);
+            work.Uref.col(i)(2) = 10;
+        }
         work.p.col(NHORIZON-1) = -cache.Pinf*work.Xref.col(NHORIZON-1);
 
-        // Initial state
-        x0 = work.Xref.col(0);
-        Xhist.col(0) = x0;
 
         tinytype tracking_error = 0;
-
         unsigned long start = micros();
-        
+
         for (int k = 0; k < NTOTAL - NHORIZON - 1; ++k)
         // for (int k=0; k < 50; k++)
         {
-            //Eigen::Matrix<double, 6, 1> x_temp;
             // std::cout << "tracking error: " << (x0 - work.Xref.col(1)).norm() << std::endl;
             tracking_error = (x0 - work.Xref.col(1)).norm();
             Serial.print("tracking error: "); Serial.println(tracking_error);
@@ -132,12 +137,17 @@ extern "C"
             work.x.col(0) = x0;
 
             // 2. Update reference
-            work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, k);
-            work.Uref = Uref_total.block<NINPUTS, NHORIZON-1>(0, k);
+            for (int i=0; i<NHORIZON; i++) {
+                work.Xref.col(i) = (xinit - xg)*(1 - tinytype(i+k)/NTOTAL);
+                // work.Uref.col(i)(2) = 10 // uref stays constant
+            }
+            // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, k);
+            // work.Uref = Uref_total.block<NINPUTS, NHORIZON-1>(0, k);
 
             // 3. Reset dual variables if needed
             // work.y = tiny_MatrixNuNhm1::Zero();
             // work.g = tiny_MatrixNxNh::Zero();
+            // reset_dual(&solver);
 
             // 4. Solve MPC problem
             // unsigned long start = micros();
@@ -151,25 +161,17 @@ extern "C"
             Serial.println("\n<<<< SOLVE COMPLETE <<<<");
             Serial.print("time step: "); Serial.println(k);
             Serial.print("iterations: "); Serial.println(work.iter);
-            Serial.print("controls: "); Serial.println(work.u.col(0).transpose().format(CleanFmt));
+            // Serial.print("controls: "); Serial.println(work.u.col(0).transpose().format(CleanFmt));
             Serial.println("");
 
             // 5. Simulate forward
             x1 = work.Adyn * x0 + work.Bdyn * work.u.col(0) + work.fdyn;
             x0 = x1;
-            Xhist.col(k+1) = x1;
-            //Eigen::Matrix<double, 6, 1> formatted_x0 = x0.transpose().format(CleanFmt).matrix();
-            //x_temp = formatted_x0
-            //Serial.print("x0: "); Serial.println(x_temp);
-            // std::cout << x0.transpose().format(CleanFmt) << std::endl;
         }
 
         unsigned long end = micros();
 
         Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds");
-
-        // std::cout << Xhist.transpose() << std::endl;
-
     }
 
 } /* extern "C" */

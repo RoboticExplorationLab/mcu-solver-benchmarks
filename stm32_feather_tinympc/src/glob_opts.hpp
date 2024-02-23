@@ -1,6 +1,6 @@
 #pragma once
 
-typedef double tinytype;  // should be double if you want to generate code
+typedef float tinytype;  // should be double if you want to generate code
 
 #define NSTATES 6
 #define NINPUTS 3

@@ -25,4 +25,5 @@ Benchmarking solvers on microcontrollers (MCU), within TinyMPC project
   * OSQP
   * TinyMPC
 * MCU
+  * STM32 (Adafruit feather board)
   * Teensy

@@ -113,6 +113,8 @@ extern "C"
         // Initialize variables
         solver->work->status = 11; // TINY_UNSOLVED
         solver->work->iter = 0;
+        // solver->work->y = Eigen::MatrixXf::Zero(NINPUTS, NHORIZON - 1);
+        // solver->work->g = Eigen::MatrixXf::Zero(NSTATES, NHORIZON);
 
         for (int i = 0; i < solver->settings->max_iter; i++)
         {
