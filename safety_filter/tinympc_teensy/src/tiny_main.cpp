@@ -1,8 +1,8 @@
-
 #include <iostream>
 #include "admm.hpp"
 #include "tiny_data_workspace.hpp"
 #include "Arduino.h"
+
 using namespace Eigen;
 // IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
 
@@ -66,7 +66,7 @@ extern "C"
 			}
 			uk = tiny_data_solver.work->Uref.col(0);
 
-			if (1)
+			if (0)
 			{ // enable safety filter
 				tiny_data_solver.work->x.col(0) = xk;
 

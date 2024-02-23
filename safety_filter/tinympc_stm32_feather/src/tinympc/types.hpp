@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen.h>
+#include "Eigen.h"
 #include "glob_opts.hpp"
 
 using Eigen::Matrix;

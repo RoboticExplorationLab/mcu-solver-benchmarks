@@ -22,6 +22,8 @@ extern "C"
 	tiny_VectorNx xhrz;
 	tiny_VectorNx xd;
 	tiny_VectorNu uk;
+	
+	static int i = 0;
 
 	void setup()
 	{
@@ -88,7 +90,12 @@ extern "C"
 			// 		  << std::endl;
 		}
 
-		return 1;
+	}
+	
+	void loop()
+	{
+		Serial.println(i++);
+		delay(1000);
 	}
 
 } /* extern "C" */

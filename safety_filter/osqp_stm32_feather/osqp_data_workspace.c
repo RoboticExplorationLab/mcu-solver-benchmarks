@@ -4,9 +4,9 @@
  * This file contains the workspace variables needed by OSQP.
  */
 
-#include "types.h"
-#include "algebra_impl.h"
-#include "qdldl_interface.h"
+#include "src/osqp/inc/private/types.h"
+#include "src/osqp/inc/private/algebra_impl.h"
+#include "src/osqp/inc/private/qdldl_interface.h"
 
 /* Define the settings structure */
 OSQPSettings osqp_data_settings = {
