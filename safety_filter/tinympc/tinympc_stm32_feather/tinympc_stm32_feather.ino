@@ -30,6 +30,7 @@ extern "C"
 		Serial.begin(9600);
 		delay(5000);
 		Serial.println("Serial initialized");
+    Serial.println("Start TinyMPC Safety Filter");
 
 		int exitflag = 1;
 		// Double check some data
@@ -96,8 +97,8 @@ extern "C"
 	
 	void loop()
 	{
-		Serial.println(i++);
-		delay(1000);
+		// Serial.println(i++);
+		// delay(1000);
 	}
 
 } /* extern "C" */
