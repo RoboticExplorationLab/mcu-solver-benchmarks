@@ -10,8 +10,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include "src/osqp/inc/public/osqp.h"
-#include "include/osqp_data_workspace.h"
-#include "osqp_problem.h"
+#include "src/osqp/inc/public/osqp_data_workspace.h"
+#include "src/osqp/inc/public/osqp_problem.h"
 #include "math.h"
 
 extern "C"

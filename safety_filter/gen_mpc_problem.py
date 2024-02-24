@@ -55,3 +55,15 @@ def osqp_export_data_to_c(dir, A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     f.write(B_string)
 
     f.close()
+
+def replace_in_file(file_path, old_lines, new_lines):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    with open(file_path, 'w') as file:
+        for line in lines:
+            if line.strip() in old_lines:
+                file.write(new_lines[old_lines.index(line.strip())] + '\n')
+            else:
+                file.write(line)
+

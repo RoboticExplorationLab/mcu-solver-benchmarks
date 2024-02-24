@@ -1,4 +1,4 @@
-#include "src/osqp/inc/public/osqp_api_types.h"
+#include "osqp_api_types.h"
 
 #pragma once
 
@@ -6,13 +6,13 @@
 
 #define NINPUTS 5
 
-#define NHORIZON 20
+#define NHORIZON 10
 
 #define NTOTAL 201
 
-#define SIZE_Q 295
+#define SIZE_Q 145
 
-#define SIZE_LU 495
+#define SIZE_LU 245
 
 const PROGMEM OSQPFloat mR[10*10] = {
   -100.0,	-0.0,	-0.0,	-0.0,	-0.0,	

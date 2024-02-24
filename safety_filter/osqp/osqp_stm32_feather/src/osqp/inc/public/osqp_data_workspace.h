@@ -8,7 +8,7 @@
 #ifndef OSQP_DATA_WORKSPACE_H
 #define OSQP_DATA_WORKSPACE_H
 
-#include "../src/osqp/inc/public/osqp_api_types.h"
+#include "osqp_api_types.h"
 
 #ifdef __cplusplus
 extern "C" {
