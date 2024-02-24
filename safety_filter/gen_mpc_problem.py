@@ -27,7 +27,7 @@ def export_mat_to_c(declare, data):
     string = string + "};"
     return string
 
-def osqp_export_data_to_c(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
+def osqp_export_data_to_c(dir, A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     SIZE_Q = (NHORIZON) * NSTATES + (NHORIZON-1) * NINPUTS
     SIZE_LU = (NHORIZON) * NSTATES * 2 + (NHORIZON-1) * NINPUTS
 
@@ -35,7 +35,7 @@ def osqp_export_data_to_c(A, B, R, NSTATES, NINPUTS, NHORIZON, NTOTAL):
     boilerplate = "#pragma once\n\n"
 
     # f = open("rand_prob_osqp_xbar.h", "w")
-    f = open('osqp_teensy/src'+"/osqp_problem.h", "w")
+    f = open(dir+"/osqp_problem.h", "w")
     f.write(include_statement)
     f.write(boilerplate)
 
