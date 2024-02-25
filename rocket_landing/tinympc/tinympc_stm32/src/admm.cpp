@@ -92,6 +92,8 @@ extern "C"
     {
         for (int i = 0; i < NHORIZON - 1; i++)
         {
+            // std::cout << "Kinf: " << solver->cache->Kinf << std::endl;
+            // std::cout << "d: " << solver->work->d.col(i) << std::endl;
             (solver->work->u.col(i)).noalias() = -solver->cache->Kinf.lazyProduct(solver->work->x.col(i)) - solver->work->d.col(i);
             (solver->work->x.col(i + 1)).noalias() = solver->work->Adyn.lazyProduct(solver->work->x.col(i)) + solver->work->Bdyn.lazyProduct(solver->work->u.col(i)) + solver->work->fdyn;
         }
@@ -104,10 +106,15 @@ extern "C"
     */
     Matrix<tinytype, 3, 1> project_soc(Matrix<tinytype, 3, 1> s, float mu) {
         tinytype u0 = s(Eigen::placeholders::last) * mu;
-        Matrix<tinytype, 3, 1> u1 = s(Eigen::placeholders::all, Eigen::placeholders::last-1);
+        Matrix<tinytype, 2, 1> u1 = s.head(2);
         float a = u1.norm();
         Matrix<tinytype, 3, 1> cone_origin;
         cone_origin.setZero();
+        // std::cout << s << std::endl;
+        // std::cout << u0 << std::endl;
+        // std::cout << u1 << std::endl;
+        // std::cout << a << std::endl;
+
         if (a <= -u0) { // below cone
             return cone_origin;
         }
@@ -139,15 +146,18 @@ extern "C"
         solver->work->bounds->znew = solver->work->u + solver->work->bounds->y;
 
         // Update second order cone slack variables for state
-        for (int i=0; i<NUM_STATE_CONES; i++) { // There can be multiple cone constraints per time step
-            solver->work->socs->vcnew[i] = solver->work->x + solver->work->socs->gc[i];
+        if (solver->settings->en_state_soc && NUM_STATE_CONES > 0) {
+            for (int i=0; i<NUM_STATE_CONES; i++) {
+                solver->work->socs->vcnew[i] = solver->work->x + solver->work->socs->gc[i];
+            }
         }
 
         // Update second order cone slack variables for input
-        for (int i=0; i<NUM_INPUT_CONES; i++) {
-            solver->work->socs->zcnew[i] = solver->work->u + solver->work->socs->yc[i];
+        if (solver->settings->en_input_soc && NUM_INPUT_CONES > 0) {
+            for (int i=0; i<NUM_INPUT_CONES; i++) {
+                solver->work->socs->zcnew[i] = solver->work->u + solver->work->socs->yc[i];
+            }
         }
-
 
         /* Project slack variables. Only box and cone constraints are supported */
 
@@ -220,7 +230,7 @@ extern "C"
     void update_linear_cost(TinySolver *solver)
     {
         solver->work->r = -(solver->work->Uref.array().colwise() * solver->work->R.array()); // Uref = 0 so commented out for speed up. Need to uncomment if using Uref
-        solver->work->r += -solver->cache->rho * (solver->work->bounds->znew - solver->work->bounds->y);
+        (solver->work->r).noalias() += -solver->cache->rho * (solver->work->bounds->znew - solver->work->bounds->y);
         if (solver->settings->en_input_soc && NUM_INPUT_CONES > 0) {
             for (int i=0; i<NUM_INPUT_CONES; i++) {
                 (solver->work->r).noalias() -= solver->cache->rho * (solver->work->socs->zcnew[i] - solver->work->socs->yc[i]);
@@ -315,13 +325,16 @@ extern "C"
             // Save previous slack variables
             solver->work->bounds->v = solver->work->bounds->vnew;
             solver->work->bounds->z = solver->work->bounds->znew;
-            for (int i=0; i<NUM_STATE_CONES; i++) {
-                solver->work->socs->vc[i] = solver->work->socs->vcnew[i];
+            if (solver->settings->en_state_soc && NUM_STATE_CONES > 0) {
+                for (int i=0; i<NUM_STATE_CONES; i++) {
+                    solver->work->socs->vc[i] = solver->work->socs->vcnew[i];
+                }
             }
-            for (int i=0; i<NUM_INPUT_CONES; i++) {
-                solver->work->socs->zc[i] = solver->work->socs->zcnew[i];
+            if (solver->settings->en_input_soc && NUM_INPUT_CONES > 0) {
+                for (int i=0; i<NUM_INPUT_CONES; i++) {
+                    solver->work->socs->zc[i] = solver->work->socs->zcnew[i];
+                }
             }
-
         }
         return 1;
     }

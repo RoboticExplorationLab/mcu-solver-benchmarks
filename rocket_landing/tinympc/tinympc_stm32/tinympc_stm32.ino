@@ -20,6 +20,8 @@
 
 #include "Arduino.h"
 
+#define NRUNS (NTOTAL - NHORIZON - 1)
+
 Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
 Eigen::IOFormat SaveData(4, 0, ", ", "\n");
 
@@ -38,6 +40,8 @@ extern "C"
         // }
         delay(5000);
         Serial.println("Serial initialized");
+        Serial.println("Start TinyMPC Rocket Landing");
+        Serial.println("============================");
         TinyBounds bounds;
         TinySocs socs;
         TinyWorkspace work;
@@ -77,15 +81,15 @@ extern "C"
         work.bounds->x_max = x_max_one_time_step.replicate(1, NHORIZON);
 
         //////// Second order cone constraints
-        work.socs->cu[0] = 0.4; // coefficients for input cones (mu)
+        work.socs->cu[0] = 0.25; // coefficients for input cones (mu)
         work.socs->cx[0] = 0.6; // coefficients for state cones (mu)
         // Number of contiguous input variables to constrain with each cone
         // For example if all inputs are [thrust_x, thrust_y, thrust_z, thrust_2x, thrust_2y, thrust_2z]
         // and we want to put a thrust cone on [thrust_y, thrust_z] we need to set socs->Acu to 1 and socs->qcu to 2
         // which corresponds to a subvector of all input variables starting at index 1 with length 2.
         // Support for arbitrary input constraints will be added in the future.
-        work.socs->Acu[0] = 1; // start indices for input cones
-        work.socs->Acx[0] = 1; // start indices for state cones
+        work.socs->Acu[0] = 0; // start indices for input cones
+        work.socs->Acx[0] = 0; // start indices for state cones
         work.socs->qcu[0] = 3; // dimensions for input cones
         work.socs->qcx[0] = 3; // dimensions for state cones
         
@@ -112,13 +116,16 @@ extern "C"
         // work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
         
         // Initial state
-        xinit << 4, 2, 20, 0, 0, 0;
-        xg << 0, 0, 0, 0, 0, 0;
-        x0 = xinit;
+        xinit << 4, 2, 20, -3, 2, -4.5;
+        xg << 0, 0, 0, 0, 0, 0.0;
+        x0 = xinit*1.1;
 
-        for (int i=0; i<NHORIZON; i++) {
-            work.Xref.col(i) = (xinit - xg)*(1 - tinytype(i)/NTOTAL);
+        // Uref stays constant
+        for (int i=0; i<NHORIZON-1; i++) {
             work.Uref.col(i)(2) = 10;
+        }
+        for (int i=0; i<NHORIZON; i++) {
+            work.Xref.col(i) = xinit + (xg - xinit)*tinytype(i)/(NTOTAL-1);
         }
         work.p.col(NHORIZON-1) = -cache.Pinf*work.Xref.col(NHORIZON-1);
 
@@ -126,19 +133,19 @@ extern "C"
         tinytype tracking_error = 0;
         unsigned long start = micros();
 
-        for (int k = 0; k < NTOTAL - NHORIZON - 1; ++k)
+        for (int k = 0; k < NRUNS; ++k)
         // for (int k=0; k < 50; k++)
         {
             // std::cout << "tracking error: " << (x0 - work.Xref.col(1)).norm() << std::endl;
             tracking_error = (x0 - work.Xref.col(1)).norm();
-            Serial.print("tracking error: "); Serial.println(tracking_error);
+            Serial.print("tracking error: "); Serial.println(tracking_error, 4);
 
             // 1. Update measurement
             work.x.col(0) = x0;
 
             // 2. Update reference
             for (int i=0; i<NHORIZON; i++) {
-                work.Xref.col(i) = (xinit - xg)*(1 - tinytype(i+k)/NTOTAL);
+                work.Xref.col(i) = xinit + (xg - xinit)*tinytype(i+k)/(NTOTAL-1);
                 // work.Uref.col(i)(2) = 10 // uref stays constant
             }
             // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, k);
@@ -150,9 +157,9 @@ extern "C"
             // reset_dual(&solver);
 
             // 4. Solve MPC problem
-            // unsigned long start = micros();
+            unsigned long start = micros();
             tiny_solve(&solver);
-            // unsigned long end = micros();
+            unsigned long end = micros();
 
             // std::cout << "\n<<<< SOLVE COMPLETE <<<<" << std::endl;
             // std::cout << "iterations: " << work.iter << std::endl;
@@ -161,7 +168,7 @@ extern "C"
             Serial.println("\n<<<< SOLVE COMPLETE <<<<");
             Serial.print("time step: "); Serial.println(k);
             Serial.print("iterations: "); Serial.println(work.iter);
-            // Serial.print("controls: "); Serial.println(work.u.col(0).transpose().format(CleanFmt));
+            Serial.print("controls: "); Serial.print(work.u.col(0)(0)); Serial.print(work.u.col(0)(1)); Serial.print(work.u.col(0)(2));
             Serial.println("");
 
             // 5. Simulate forward
@@ -169,17 +176,17 @@ extern "C"
             x0 = x1;
         }
 
-        unsigned long end = micros();
+        // unsigned long end = micros();
 
-        Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds");
+        // Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds");
     }
 
 } /* extern "C" */
 
 void loop()
 {
-    Serial.println(i++);
-    delay(1000);
+    // Serial.println(i++);
+    // delay(1000);
 
 }
 

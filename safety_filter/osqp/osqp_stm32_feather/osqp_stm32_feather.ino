@@ -157,6 +157,7 @@ extern "C"
 		delay(5000);
 		Serial.println("Serial initialized");
     Serial.println("Start OSQP Safety Filter");
+    Serial.println("============================");
 
     // std::cout << "Start OSQP filtering!" << std::endl;
 

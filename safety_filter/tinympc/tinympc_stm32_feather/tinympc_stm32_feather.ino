@@ -31,6 +31,7 @@ extern "C"
 		delay(5000);
 		Serial.println("Serial initialized");
     Serial.println("Start TinyMPC Safety Filter");
+    Serial.println("============================");
 
 		int exitflag = 1;
 		// Double check some data
