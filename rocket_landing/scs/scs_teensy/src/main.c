@@ -8,13 +8,13 @@ Content: Example program for updating parameters, solving, and inspecting the re
 #include <stdlib.h>
 #include "cpg_workspace.h"
 #include "cpg_solve.h"
+#include "cpg_problem.h"
 #include "math.h"
 #include "Arduino.h"
 
+#define NRUNS (NTOTAL - NHORIZON - 1)
+
 static int i;
-#define NSTATES 6
-#define NINPUTS 3
-#define NTOTAL 301
 
 void add_noise(float x[], float var)
 {
@@ -92,27 +92,20 @@ float compute_norm(float x[], float x_bar[])
   return sqrt(res);
 }
 
-// May need to save in workspace
-const float A[] = {1.0, 0.0, 0.0, 0.05, 0.0, 0.0,
-                   0.0, 1.0, 0.0, 0.0, 0.05, 0.0,
-                   0.0, 0.0, 1.0, 0.0, 0.0, 0.05,
-                   0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-                   0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                   0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
-const float B[] = {0.000125, 0.0, 0.0,
-                   0.0, 0.000125, 0.0,
-                   0.0, 0.0, 0.000125,
-                   0.005, 0.0, 0.0,
-                   0.0, 0.005, 0.0,
-                   0.0, 0.0, 0.005};
-const float f[] = {0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905};
-const float Q_single = 1e3;
 const float xref0[] = {4, 2, 20, -3, 2, -4.5};
 
 float xn[NSTATES] = {0};
 float x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
 float u[NINPUTS] = {0};
 float temp = 0;
+
+float u_test[NINPUTS] = {0};
+float x_test[NSTATES] = {0};
+float x1_test[NSTATES] = {0};
+
+float max_dyn_vio = 0.0;
+float max_cone_vio = 0.0;
+float max_bnd_vio = 0.0;
 
 int main(int argc, char *argv[]){
   // delay for 4 seconds
@@ -121,13 +114,6 @@ int main(int argc, char *argv[]){
     delay(1000);
   }
   printf("Start SCS Rocket Landing\n");
-
-  // size of cpg_params_vec = (NHORIZON+1) * NSTATES + (NHORIZON-1)*NINPUTS + 1
-  int num_params = (sizeof(cpg_params_vec)/sizeof(cpg_float));
-  int NHORIZON = (num_params - NSTATES + NINPUTS - 1) / (NSTATES + NINPUTS);
-  int NRUNS = NTOTAL - NHORIZON - 1;
-  printf("NHORIZON = %d\n", NHORIZON);
-
 
   // UPDATE SOLVER OPTIONS FIRST
 

@@ -1,7 +1,9 @@
 import numpy as np
+import os
 import cvxpy as cp
 from cvxpygen import cpg
 import scipy
+from gen_mpc_problem import socp_export_data_to_c, replace_in_file
 
 def stage_cost_expansion(p, k):
     dx = -np.array(p['Xref'][k])
@@ -175,14 +177,29 @@ q_param.value = update_linear_term(params)[1]
 GEN_CODE = 1
 
 opts = {"verbose": False, "max_iters": 100}
-SOLVER = "ECOS"
-# SOLVER = "SCS"
+# SOLVER = "ECOS"
+SOLVER = "SCS"
 
 if GEN_CODE:
     if SOLVER == "ECOS":
-        cpg.generate_code(problem, code_dir='ecos/generated_ecos', solver=SOLVER, solver_opts=opts)
+        output_dir = 'ecos/generated_ecos'
+        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts)
+        mcu_dir = 'ecos/ecos_teensy'
+        socp_export_data_to_c(mcu_dir+'/include', A, B, f, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
+        os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')
+        os.system('cp -R '+output_dir+'/c/include/cpg_workspace.h'+' '+mcu_dir+'/include/cpg_workspace.h')
+        os.system('cp -R '+output_dir+'/c/src/cpg_solve.c'+' '+mcu_dir+'/src/cpg_solve.c')
+        os.system('cp -R '+output_dir+'/c/src/cpg_workspace.c'+' '+mcu_dir+'/src/cpg_workspace.c')
     if SOLVER == "SCS":
-        cpg.generate_code(problem, code_dir='scs/generated_scs', solver=SOLVER, solver_opts=opts)
+        output_dir = 'scs/generated_scs'
+        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts)
+        mcu_dir = 'scs/scs_teensy'
+        socp_export_data_to_c(mcu_dir+'/include', A, B, f, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
+        os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')
+        os.system('cp -R '+output_dir+'/c/include/cpg_workspace.h'+' '+mcu_dir+'/include/cpg_workspace.h')
+        os.system('cp -R '+output_dir+'/c/src/cpg_solve.c'+' '+mcu_dir+'/src/cpg_solve.c')
+        os.system('cp -R '+output_dir+'/c/src/cpg_workspace.c'+' '+mcu_dir+'/src/cpg_workspace.c')
+
     problem.solve(verbose=False, solver=SOLVER, max_iters=100)
     print(z.value)
 else:
