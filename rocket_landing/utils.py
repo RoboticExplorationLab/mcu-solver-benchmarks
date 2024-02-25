@@ -32,12 +32,10 @@ def socp_export_data_to_c(dir, A, B, fdyn, Q_single, NSTATES, NINPUTS, NHORIZON,
     SIZE_LU = (NHORIZON) * NSTATES * 2 + (NHORIZON-1) * NINPUTS
 
     boilerplate = "#pragma once\n\n"
-    include_statement = '#include "cpg_workspace.h"\n\n'
 
     f = open(dir+"/cpg_problem.h", "w")
 
     f.write(boilerplate)
-    f.write(include_statement)
 
     f.write("#define NSTATES "+str(NSTATES)+'\n\n')
     f.write("#define NINPUTS "+str(NINPUTS)+'\n\n')
@@ -45,9 +43,9 @@ def socp_export_data_to_c(dir, A, B, fdyn, Q_single, NSTATES, NINPUTS, NHORIZON,
     f.write("#define NTOTAL "+str(NTOTAL)+'\n\n')
     f.write("#define Q_single "+str(Q_single)+'\n\n')
 
-    A_string = export_mat_to_c("const PROGMEM cpg_float A["+str(NSTATES)+"*"+str(NSTATES)+"] ", A)+'\n\n'
-    B_string = export_mat_to_c("const PROGMEM cpg_float B["+str(NSTATES)+"*"+str(NINPUTS)+"] ", B)+'\n\n'
-    f_string = export_mat_to_c("const PROGMEM cpg_float f["+str(NSTATES)+"] ", fdyn.reshape(NSTATES,1))+'\n\n'
+    A_string = export_mat_to_c("const PROGMEM float A["+str(NSTATES)+"*"+str(NSTATES)+"] ", A)+'\n\n'
+    B_string = export_mat_to_c("const PROGMEM float B["+str(NSTATES)+"*"+str(NINPUTS)+"] ", B)+'\n\n'
+    f_string = export_mat_to_c("const PROGMEM float f["+str(NSTATES)+"] ", fdyn.reshape(NSTATES,1))+'\n\n'
 
     f.write(A_string)
     f.write(B_string)

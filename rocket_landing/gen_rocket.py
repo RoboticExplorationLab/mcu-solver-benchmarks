@@ -3,7 +3,7 @@ import os
 import cvxpy as cp
 from cvxpygen import cpg
 import scipy
-from gen_mpc_problem import socp_export_data_to_c, replace_in_file
+from utils import socp_export_data_to_c, replace_in_file
 
 def stage_cost_expansion(p, k):
     dx = -np.array(p['Xref'][k])
@@ -57,7 +57,7 @@ f = np.array([0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905])
 
 NSTATES = 6
 NINPUTS = 3
-NHORIZON = 21 # horizon length, short for MPC
+NHORIZON = 35 # horizon length, short for MPC
 NTOTAL = 301
 dt = 0.05
 t_vec = dt * np.arange(NTOTAL)
