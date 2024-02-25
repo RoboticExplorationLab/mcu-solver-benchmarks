@@ -1,6 +1,8 @@
 # Files from embedded code generators
 tinympc_generated/
 osqp_generated/
+generated_ecos/
+generated_ecos/
 
 # Project-specific files
 # random_problems
