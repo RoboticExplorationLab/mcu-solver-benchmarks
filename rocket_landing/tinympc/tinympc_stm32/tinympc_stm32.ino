@@ -168,7 +168,7 @@ extern "C"
             Serial.println("\n<<<< SOLVE COMPLETE <<<<");
             Serial.print("time step: "); Serial.println(k);
             Serial.print("iterations: "); Serial.println(work.iter);
-            Serial.print("controls: "); Serial.print(work.u.col(0)(0)); Serial.print(work.u.col(0)(1)); Serial.print(work.u.col(0)(2));
+            Serial.print("controls: "); Serial.print(work.u.col(0)(0)); Serial.print(" "); Serial.print(work.u.col(0)(1)); Serial.print(" "); Serial.print(work.u.col(0)(2));
             Serial.println("");
 
             // 5. Simulate forward
