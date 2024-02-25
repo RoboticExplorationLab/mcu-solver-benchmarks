@@ -14,18 +14,20 @@ Content: Example program for updating parameters, solving, and inspecting the re
 static int i;
 #define NSTATES 6
 #define NINPUTS 3
+#define NHORIZON 21
 #define NTOTAL 301
+#define NRUNS (NTOTAL - NHORIZON - 1)
 
-void add_noise(float x[], float var)
-{
-  for (int i = 0; i < NSTATES; ++i)
-  {
-    float noise = ((rand() / RAND_MAX) - 0.5) * 2; // random -1 to 1
-    x[i] += noise * var;
-  }
-}
+// void add_noise(double x[])
+// {
+//   for (int i = 0; i < NSTATES; ++i)
+//   {
+//     double noise = (double(rand() / RAND_MAX) - 0.5)*2 * 0.01;
+//     x[i] += noise;
+//   }
+// }
 
-void print_vector(float xn[], int n)
+void print_vector(double xn[], int n)
 {
   for (int i = 0; i < n; ++i)
   {
@@ -37,9 +39,9 @@ void print_vector(float xn[], int n)
 
 void matrix_vector_mult(int n1,
                         int n2,
-                        float matrix[],
-                        float vector[],
-                        float result_vector[])
+                        double matrix[],
+                        double vector[],
+                        double result_vector[])
 {
   // n1 is rows of matrix
   // n2 is cols of matrix, or vector
@@ -55,9 +57,9 @@ void matrix_vector_mult(int n1,
 
 void matrix_vector_reset_mult(int n1,
                               int n2,
-                              float matrix[],
-                              float vector[],
-                              float result_vector[])
+                              double matrix[],
+                              double vector[],
+                              double result_vector[])
 {
   // n1 is rows of matrix
   // n2 is cols of matrix, or vector
@@ -72,7 +74,7 @@ void matrix_vector_reset_mult(int n1,
   }
 }
 
-void system_dynamics(float xn[], float x[], float u[], float A[], float B[], float f[])
+void system_dynamics(double xn[], double x[], double u[], double A[], double B[], double f[])
 {
   matrix_vector_reset_mult(NSTATES, NSTATES, A, x, xn);
   matrix_vector_mult(NSTATES, NINPUTS, B, u, xn);
@@ -82,9 +84,9 @@ void system_dynamics(float xn[], float x[], float u[], float A[], float B[], flo
   }
 }
 
-float compute_norm(float x[], float x_bar[])
+double compute_norm(double x[], double x_bar[])
 {
-  float res = 0.0f;
+  double res = 0.0f;
   for (int i = 0; i < NSTATES; ++i)
   {
     res += (x[i] - x_bar[i]) * (x[i] - x_bar[i]);
@@ -93,68 +95,74 @@ float compute_norm(float x[], float x_bar[])
 }
 
 // May need to save in workspace
-const float A[] = {1.0, 0.0, 0.0, 0.05, 0.0, 0.0,
+const double A[] = {1.0, 0.0, 0.0, 0.05, 0.0, 0.0,
                    0.0, 1.0, 0.0, 0.0, 0.05, 0.0,
                    0.0, 0.0, 1.0, 0.0, 0.0, 0.05,
                    0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
                    0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
                    0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
-const float B[] = {0.000125, 0.0, 0.0,
+const double B[] = {0.000125, 0.0, 0.0,
                    0.0, 0.000125, 0.0,
                    0.0, 0.0, 0.000125,
                    0.005, 0.0, 0.0,
                    0.0, 0.005, 0.0,
                    0.0, 0.0, 0.005};
-const float f[] = {0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905};
-const float Q_single = 1e3;
-const float xref0[] = {4, 2, 20, -3, 2, -4.5};
+const double f[] = {0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905};
+const double Q_single = 1e3;
+const double xref0[] = {4, 2, 20, -3, 2, -4.5};
 
-float xn[NSTATES] = {0};
-float x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
-float u[NINPUTS] = {0};
-float temp = 0;
+double xn[NSTATES] = {0};
+double x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
+double u[NINPUTS] = {0};
+double temp = 0;
 
 int main(int argc, char *argv[]){
-  // delay for 4 seconds
-  for (int i = 0; i < 4; ++i)
-  {
-    delay(1000);
-  }
-  printf("Start SCS Rocket Landing\n");
-
-  // size of cpg_params_vec = (NHORIZON+1) * NSTATES + (NHORIZON-1)*NINPUTS + 1
-  int num_params = (sizeof(cpg_params_vec)/sizeof(cpg_float));
-  int NHORIZON = (num_params - NSTATES + NINPUTS - 1) / (NSTATES + NINPUTS);
-  int NRUNS = NTOTAL - NHORIZON - 1;
-  printf("NHORIZON = %d\n", NHORIZON);
-
-
   // UPDATE SOLVER OPTIONS FIRST
 
+  // for ecos
+  // cpg_set_solver_abstol(1e-2);
+  // cpg_set_solver_reltol(1e-2);
+  // cpg_set_solver_maxit(100);
+
   // for scs
-  cpg_set_solver_eps_abs(1e-2);
-  cpg_set_solver_eps_rel(1e-2);
-  cpg_set_solver_max_iters(100);
-  
-  srand(1);
+  // cpg_set_solver_eps_abs(1e-2);
+  // cpg_set_solver_eps_rel(1e-2);
+  // cpg_set_solver_max_iters(100);
+  // start serial terminal
+
   for (int k = 0; k < NRUNS; ++k) {
     //// Update current measurement
+    double param1_values[NSTATES];
     for (int i = 0; i < NSTATES; ++i)
     {
       cpg_update_param1(i, x[i]);
+      param1_values[i] = x[i];
     }
     printf("x = ");
     print_vector(x, NSTATES);
 
+    // for (int i = 0; i < NHORIZON; ++i)
+    // {
+    //   printf(" cpg_params_vec[0] = %f\n", cpg_params_vec[i]);
+    // }
+    double param3_values[NHORIZON * NSTATES];
     //// Update references
     for (int i = 0; i < NHORIZON; ++i)
     {
       for (int j = 0; j < NSTATES; ++j)
       {
         temp = xref0[j] + (0-xref0[j]) * (k+i) / (NTOTAL-1);
+        // printf("temp = %f\n", temp);
         cpg_update_param3(i*(NSTATES+NINPUTS) + j, -Q_single * temp);
+        param3_values[i * NSTATES + j] = -Q_single * temp;
       }
     }
+    double norm = compute_norm(param1_values, &param3_values[k * NSTATES]);
+    printf("norm: %10.4f\n", norm);
+    // for (int i = 0; i < NHORIZON; ++i)
+    // {
+    //   printf("  cpg_params_vec[0] = %f\n", cpg_params_vec[i]);
+    // }
     
     // Solve the problem instance
     unsigned long start = micros();
@@ -162,7 +170,7 @@ int main(int argc, char *argv[]){
     cpg_solve();
     unsigned long end = micros();
     // printf("%d\n", end-start);
-    printf("STEP: %3d TIME: %10d\n", k, end - start);
+    printf("TIME: %10d\n",end - start);
 
     // Get data from the result
     for (i=NSTATES; i<NSTATES+NHORIZON; i++) {
@@ -173,17 +181,19 @@ int main(int argc, char *argv[]){
 
     // Simulate the system
     system_dynamics(xn, x, u, A, B, f);
-    // printf("xn = ");
+    printf("xn = ");
     print_vector(xn, NSTATES);
 
     // Update the state
-    memcpy(x, xn, NSTATES * (sizeof(float)));
-    // print_vector(x, NSTATES);
-    add_noise(x, 0.01);
-    // print_vector(x, NSTATES);
+    memcpy(x, xn, NSTATES * (sizeof(double)));
 
     // Print objective function value
     // printf("obj = %f\n", CPG_Result.info->obj_val);
+
+    //// Print primal solution
+    // for(i=0; i<186; i++) {
+    //   printf("var2[%d] = %f\n", i, CPG_Result.prim->var2[i]);
+    // }
   }
   return 0;
 }
