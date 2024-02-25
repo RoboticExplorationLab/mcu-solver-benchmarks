@@ -180,9 +180,9 @@ SOLVER = "ECOS"
 
 if GEN_CODE:
     if SOLVER == "ECOS":
-        cpg.generate_code(problem, code_dir='generated_ecos', solver=SOLVER, solver_opts=opts)
+        cpg.generate_code(problem, code_dir='ecos/generated_ecos', solver=SOLVER, solver_opts=opts)
     if SOLVER == "SCS":
-        cpg.generate_code(problem, code_dir='generated_scs', solver=SOLVER, solver_opts=opts)
+        cpg.generate_code(problem, code_dir='scs/generated_scs', solver=SOLVER, solver_opts=opts)
     problem.solve(verbose=False, solver=SOLVER, max_iters=100)
     print(z.value)
 else:
