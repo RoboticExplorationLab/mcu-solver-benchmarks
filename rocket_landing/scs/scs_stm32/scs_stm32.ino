@@ -13,8 +13,8 @@ Content: Example program for updating parameters, solving, and inspecting the re
 
 extern "C" {
 
-#include "solver_code/cpg_workspace.h"
-#include "solver_code/cpg_solve.h"
+#include "src/cpg_workspace.h"
+#include "src/cpg_solve.h"
 
   static int i;
 #define NSTATES 6

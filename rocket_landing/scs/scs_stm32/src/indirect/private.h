@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-#include "glbopts.h"
-#include "linalg.h"
-#include "scs.h"
-#include "scs_matrix.h"
+#include "../glbopts.h"
+#include "../linalg.h"
+#include "../scs.h"
+#include "../scs_matrix.h"
 #include <math.h>
 
 struct SCS_LIN_SYS_WORK {

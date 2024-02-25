@@ -1,6 +1,6 @@
 #include "private.h"
-#include "linsys.h"
-#include "util.h"
+#include "../linsys.h"
+#include "../util.h"
 #include <limits.h>
 
 const char *SCS(get_lin_sys_method)() {

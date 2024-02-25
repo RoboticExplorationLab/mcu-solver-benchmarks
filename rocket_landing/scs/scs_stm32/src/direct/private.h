@@ -5,12 +5,12 @@
 extern "C" {
 #endif
 
-#include "csparse.h"
-#include "external/amd/amd.h"
-#include "external/qdldl/qdldl.h"
-#include "glbopts.h"
-#include "scs.h"
-#include "scs_matrix.h"
+#include "../csparse.h"
+#include "../amd.h"
+#include "../qdldl.h"
+#include "../glbopts.h"
+#include "../scs.h"
+#include "../scs_matrix.h"
 
 struct SCS_LIN_SYS_WORK {
   scs_int m, n;    /* linear system dimensions */
