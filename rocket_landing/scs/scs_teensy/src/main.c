@@ -97,17 +97,9 @@ float x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
 float u[NINPUTS] = {0};
 float temp = 0;
 
-float u_test[NINPUTS] = {0};
-float x_test[NSTATES] = {0};
-float x1_test[NSTATES] = {0};
-
-float max_dyn_vio = 0.0;
-float max_cone_vio = 0.0;
-float max_bnd_vio = 0.0;
-
 int main(int argc, char *argv[]){
   // delay for 4 seconds
-  // delay(4000);
+  delay(500);
   printf("Start SCS Rocket Landing\n");
   printf("========================\n");
 
@@ -123,8 +115,8 @@ int main(int argc, char *argv[]){
     {
       cpg_update_param1(i, x[i]);
     }
-    printf("x = ");
-    print_vector(x, NSTATES);
+    // printf("x = ");
+    // print_vector(x, NSTATES);
 
     //// Update references
     for (int i = 0; i < NHORIZON; ++i)
@@ -149,16 +141,14 @@ int main(int argc, char *argv[]){
     // printf("%d\n", start);
     cpg_solve();
     unsigned long end = micros();
-    // printf("%d\n", end-start);
-    printf("STEP: %3d TIME: %8d \n", k, (int)(end - start));
-    printf("iter = %d\n", CPG_Info.iter);
+    printf("%d %d\n", CPG_Info.iter, (int)(end - start));
 
     // Get data from the result
     for (i=0; i<NINPUTS; i++) {
       u[i] = CPG_Result.prim->var2[i+NSTATES];
     }
-    printf("u = ");
-    print_vector(u, NINPUTS);
+    // printf("u = ");
+    // print_vector(u, NINPUTS);
 
     // Simulate the system
     system_dynamics(xn, x, u, A, B, f);

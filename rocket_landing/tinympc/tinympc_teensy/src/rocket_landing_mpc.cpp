@@ -30,8 +30,7 @@ extern "C"
 
     int main()
     {
-        delay(4000);
-        Serial.println("Serial initialized");
+        delay(500);
         Serial.println("Start TinyMPC Rocket Landing");
         Serial.println("============================");
         TinyBounds bounds;
@@ -130,9 +129,9 @@ extern "C"
         // for (int k=0; k < 50; k++)
         {
             // std::cout << "tracking error: " << (x0 - work.Xref.col(1)).norm() << std::endl;
-            tracking_error = (x0 - work.Xref.col(0)).norm();
-            Serial.print("tracking error: ");
-            Serial.println(tracking_error, 4);
+            // tracking_error = (x0 - work.Xref.col(0)).norm();
+            // Serial.print("tracking error: ");
+            // Serial.println(tracking_error, 4);
 
             // 1. Update measurement
             work.x.col(0) = x0;
@@ -162,25 +161,29 @@ extern "C"
             tiny_solve(&solver);
             unsigned long end = micros();
 
-            // std::cout << "\n<<<< SOLVE COMPLETE <<<<" << std::endl;
             // std::cout << "iterations: " << work.iter << std::endl;
             // std::cout << "controls: " << work.u.col(0).transpose().format(CleanFmt) << std::endl;
             // std::cout << std::endl;
-            printf("STEP: %3d TIME: %8d \n", k, (int)(end - start));
-            Serial.print("iterations: ");
-            Serial.println(work.iter);
-            Serial.print("controls: ");
-            Serial.print(work.u.col(0)(0));
-            Serial.print(" ");
-            Serial.print(work.u.col(0)(1));
-            Serial.print(" ");
-            Serial.print(work.u.col(0)(2));
-            Serial.println("");
+            // printf("STEP: %3d TIME: %8d \n", k, (int)(end - start));
+            // Serial.print("iterations: ");
+            // Serial.println(work.iter);
+            // Serial.print("controls: ");
+            // Serial.print(work.u.col(0)(0));
+            // Serial.print(" ");
+            // Serial.print(work.u.col(0)(1));
+            // Serial.print(" ");
+            // Serial.print(work.u.col(0)(2));
+            // Serial.println("");
+
+            // printf("%3d %8d\n", work.iter, (int)(end - start));
 
             // 5. Simulate forward
             x1 = work.Adyn * x0 + work.Bdyn * work.u.col(0) + work.fdyn;
             x0 = x1;
             x0 += tiny_VectorNx::Random() * 0.01;
+
+            // DATA LOGGING
+            Serial.print(work.iter); Serial.print(" "); Serial.println((int)(end - start));
         }
 
         // unsigned long end = micros();

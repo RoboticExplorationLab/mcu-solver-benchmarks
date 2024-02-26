@@ -97,17 +97,9 @@ float x[NSTATES] = {4.4, 2.2, 22, -3.3, 2.2, -4.95};
 float u[NINPUTS] = {0};
 float temp = 0;
 
-float u_test[NINPUTS] = {0};
-float x_test[NSTATES] = {0};
-float x1_test[NSTATES] = {0};
-
-float max_dyn_vio = 0.0;
-float max_cone_vio = 0.0;
-float max_bnd_vio = 0.0;
-
 int main(int argc, char *argv[]){
   // delay for 4 seconds
-  // delay(1000);
+  delay(500);
   printf("Start ECOS Rocket Landing\n");
   printf("========================\n");
 
@@ -147,32 +139,29 @@ int main(int argc, char *argv[]){
     
     // Solve the problem instance
     unsigned long start = micros();
-    // printf("%d\n", start);
     cpg_solve();
     unsigned long end = micros();
-    // printf("%d\n", end-start);
-    printf("STEP: %3d TIME: %8d \n", k, (int)(end - start));
-    printf("iter = %d\n", CPG_Info.iter);
+    printf("%3d %8d\n",  CPG_Info.iter, (int)(end - start));
 
     // Get data from the result
-    for (i=0; i<NINPUTS; i++) {
-      u[i] = CPG_Result.prim->var2[i+NSTATES];
-    }
-    printf("u = ");
-    print_vector(u, NINPUTS);
+    // for (i=0; i<NINPUTS; i++) {
+    //   u[i] = CPG_Result.prim->var2[i+NSTATES];
+    // }
+    // printf("u = ");
+    // print_vector(u, NINPUTS);
 
     // Simulate the system
-    for (int i = 0; i < NSTATES; ++i)
-    {
-      x[i] = (float)cpg_params_vec[i + NSTATES*NHORIZON + NINPUTS*(NHORIZON-1)];
-    }
-    print_vector(x, NSTATES);
-    system_dynamics(xn, x, u, A, B, f);
-    printf("xn = ");
-    print_vector(xn, NSTATES);
+    // for (int i = 0; i < NSTATES; ++i)
+    // {
+    //   x[i] = (float)cpg_params_vec[i + NSTATES*NHORIZON + NINPUTS*(NHORIZON-1)];
+    // }
+    // print_vector(x, NSTATES);
+    // system_dynamics(xn, x, u, A, B, f);
+    // printf("xn = ");
+    // print_vector(xn, NSTATES);
 
     // Update the state
-    memcpy(x, xn, NSTATES * (sizeof(float)));
+    // memcpy(x, xn, NSTATES * (sizeof(float)));
     // add_noise(x, 0.01);
 
   }

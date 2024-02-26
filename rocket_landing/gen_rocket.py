@@ -167,11 +167,11 @@ params["Uref"] = Uref[0:NHORIZON-1]*1
 q_param.value = update_linear_term(params)[1]  
 
 # GENERATE CODE (uncomment to generate code)
-GEN_CODE = 0
+GEN_CODE = 1
 
 opts = {"verbose": False, "max_iters": 500}
-SOLVER = "ECOS"
-# SOLVER = "SCS"
+# SOLVER = "ECOS"
+SOLVER = "SCS"
 
 if GEN_CODE:
     if SOLVER == "ECOS":
