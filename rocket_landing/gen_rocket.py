@@ -157,7 +157,7 @@ for k in range(NHORIZON-1):
 problem = cp.Problem(objective,constraints)
 
 # MPC loop
-np.random.seed(1234)
+np.random.seed(1)
 Xhist = np.zeros((NSTATES, NTOTAL))
 Xhist[:, 0] = x0*1.1
 Uhist = np.zeros((NINPUTS, NTOTAL-1))
@@ -170,7 +170,7 @@ q_param.value = update_linear_term(params)[1]
 GEN_CODE = 1
 
 opts = {"verbose": False, "max_iters": 500}
-# SOLVER = "ECOS"
+# SOLVER = "ECOS" # PIPELINE FOR ECOS IN `run_ecos.py`
 SOLVER = "SCS"
 
 if GEN_CODE:
