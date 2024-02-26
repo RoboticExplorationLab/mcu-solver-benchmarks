@@ -222,6 +222,7 @@ extern "C"
       // print_vector(xk, NSTATES);
       // print_vector(xd, NSTATES);
       system_dynamics(xd, xk, uk, A, B);
+      add_noise(xd, 0.01);
       // print_vector(xd, NSTATES);
       memcpy(xk, xd, NSTATES * (sizeof(OSQPFloat)));
       // std::cout << "Step: " << step << std::endl;

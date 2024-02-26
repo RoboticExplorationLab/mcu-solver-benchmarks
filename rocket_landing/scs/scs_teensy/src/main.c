@@ -107,16 +107,14 @@ float max_bnd_vio = 0.0;
 
 int main(int argc, char *argv[]){
   // delay for 4 seconds
-  for (int i = 0; i < 4; ++i)
-  {
-    delay(1000);
-  }
+  delay(4000);
   printf("Start SCS Rocket Landing\n");
+  printf("========================\n");
 
   // for scs
   cpg_set_solver_eps_abs(1e-2);
-  cpg_set_solver_eps_rel(1e-2);
-  cpg_set_solver_max_iters(100);
+  cpg_set_solver_eps_rel(1e-3);
+  cpg_set_solver_max_iters(500);
 
   srand(1);
   for (int k = 0; k < NTOTAL; ++k) {
@@ -133,7 +131,14 @@ int main(int argc, char *argv[]){
     {
       for (int j = 0; j < NSTATES; ++j)
       {
-        temp = xref0[j] + (0-xref0[j]) * (k+i) / (NTOTAL-1);
+        if (k+i >= NTOTAL)
+        {
+          temp = 0.0;
+        }
+        else
+        {
+          temp = xref0[j] + (0-xref0[j]) * (float)(k+i) / (NTOTAL);
+        }
         // printf("temp = %f\n", temp);
         cpg_update_param3(i*(NSTATES+NINPUTS) + j, -Q_single * temp);
       }
@@ -146,6 +151,7 @@ int main(int argc, char *argv[]){
     unsigned long end = micros();
     // printf("%d\n", end-start);
     printf("STEP: %3d TIME: %8d \n", k, (int)(end - start));
+    printf("iter = %d\n", CPG_Info.iter);
 
     // Get data from the result
     for (i=0; i<NINPUTS; i++) {

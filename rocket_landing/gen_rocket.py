@@ -16,8 +16,6 @@ def stage_cost_expansion(p, k):
 def term_cost_expansion(p):
     dx = -np.array(p['Xref'][p['NHORIZON']-1])
     Qf = p['Qf']
-    # print('Qf', Qf)
-    # print('dx', dx)
     return Qf, Qf @  dx
 
 
@@ -38,26 +36,26 @@ def update_linear_term(params):
     Qf, dQf = term_cost_expansion(params)
     P[-NSTATES:, -NSTATES:] = Qf  
     q[-NSTATES:] = dQf.reshape(-1, 1)    
-    return scipy.linalg.sqrtm(P), q
+    return P, q
 
 # Define problem parameters
-A = np.array([[1.0, 0.0, 0.0, 0.05, 0.0, 0.0],
+Ad = np.array([[1.0, 0.0, 0.0, 0.05, 0.0, 0.0],
                 [0.0, 1.0, 0.0, 0.0, 0.05, 0.0],
                 [0.0, 0.0, 1.0, 0.0, 0.0, 0.05],
                 [0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
                 [0.0, 0.0, 0.0, 0.0, 0.0, 1.0]])
-B = np.array([[0.000125, 0.0, 0.0],
+Bd = np.array([[0.000125, 0.0, 0.0],
                 [0.0, 0.000125, 0.0],
                 [0.0, 0.0, 0.000125],
                 [0.005, 0.0, 0.0],
                 [0.0, 0.005, 0.0],
                 [0.0, 0.0, 0.005]])
-f = np.array([0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905])
+fd = np.array([0.0, 0.0, -0.0122625, 0.0, 0.0, -0.4905])
 
 NSTATES = 6
 NINPUTS = 3
-NHORIZON = 35 # horizon length, short for MPC
+NHORIZON = 32 # horizon length, short for MPC
 NTOTAL = 301
 dt = 0.05
 t_vec = dt * np.arange(NTOTAL)
@@ -66,7 +64,9 @@ t_vec = dt * np.arange(NTOTAL)
 x0 = np.array([4, 2, 20, -3, 2, -4.5])
 xg = np.array([0, 0, 0, 0, 0, 0.0])
 Xref = [x0 + (xg - x0) * k / (NTOTAL-1) for k in range(NTOTAL)]
+Xref = Xref + [xg for _ in range(NHORIZON)]
 Uref = [[0, 0, 10.] for _ in range(NTOTAL - 1)]
+# import pdb; pdb.set_trace()
 Xref_hrz = Xref[:NHORIZON]*1
 Uref_hrz = Uref[:NHORIZON-1]*1
 
@@ -80,12 +80,6 @@ Qf = Q*1
 # mass = 10.0
 # perWeightMax = 2.0
 # θ_thrust_max = 5.0  # deg
-
-A_cone = np.array([[1, 0, 0], [0, 1.0, 0]])
-# c_cone = np.array([0.0, 0.0, np.tan(np.radians(θ_thrust_max))])
-c_cone = np.array([0.0, 0.0, 0.4])
-# u_bnd = mass * np.abs(gravity[2]) * perWeightMax
-# print('u_bnd', u_bnd.shape)
 
 # Sloppy bounds to test
 u_min = -10 * np.ones(NINPUTS)
@@ -114,7 +108,7 @@ X = [np.copy(x0) for _ in range(NHORIZON)]
 U = [np.copy(Uref[0]) for _ in range(NHORIZON-1)]
 # print('U', len(U))
 
-NN = NHORIZON*NSTATES + (NHORIZON-1)*NINPUTS  # NINPUTSmber of decision variables
+NN = NHORIZON*NSTATES + (NHORIZON-1)*NINPUTS  # Number of decision variables
 x0_param = cp.Parameter(NSTATES)  # initial state
 
 z = cp.Variable(NN)
@@ -136,8 +130,8 @@ objective = cp.Minimize(0.5 * cp.sum_squares(Psqrt @ z) + q_param.T @ z)
 constraints = []
 
 # Dynamics Constraints
-for k in range(NHORIZON - 2):
-    constraints.append(A @ z[xinds[k]] + B @ z[uinds[k]] + f == z[xinds[k+1]])
+for k in range(NHORIZON-1):
+    constraints.append(Ad @ z[xinds[k]] + Bd @ z[uinds[k]] + fd == z[xinds[k+1]])
 
 # Initial states
 constraints.append(z[xinds[0]] == x0_param)
@@ -164,7 +158,6 @@ problem = cp.Problem(objective,constraints)
 
 # MPC loop
 np.random.seed(1234)
-NRUNS = NTOTAL - NHORIZON - 1
 Xhist = np.zeros((NSTATES, NTOTAL))
 Xhist[:, 0] = x0*1.1
 Uhist = np.zeros((NINPUTS, NTOTAL-1))
@@ -176,7 +169,7 @@ q_param.value = update_linear_term(params)[1]
 # GENERATE CODE (uncomment to generate code)
 GEN_CODE = 1
 
-opts = {"verbose": False, "max_iters": 100}
+opts = {"verbose": False, "max_iters": 500}
 # SOLVER = "ECOS"
 SOLVER = "SCS"
 
@@ -185,7 +178,7 @@ if GEN_CODE:
         output_dir = 'ecos/generated_ecos'
         cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts)
         mcu_dir = 'ecos/ecos_teensy'
-        socp_export_data_to_c(mcu_dir+'/include', A, B, f, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
+        socp_export_data_to_c(mcu_dir+'/include', Ad, Bd, fd, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
         os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')
         os.system('cp -R '+output_dir+'/c/include/cpg_workspace.h'+' '+mcu_dir+'/include/cpg_workspace.h')
         os.system('cp -R '+output_dir+'/c/src/cpg_solve.c'+' '+mcu_dir+'/src/cpg_solve.c')
@@ -194,7 +187,7 @@ if GEN_CODE:
         output_dir = 'scs/generated_scs'
         cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts)
         mcu_dir = 'scs/scs_teensy'
-        socp_export_data_to_c(mcu_dir+'/include', A, B, f, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
+        socp_export_data_to_c(mcu_dir+'/include', Ad, Bd, fd, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
         os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')
         os.system('cp -R '+output_dir+'/c/include/cpg_workspace.h'+' '+mcu_dir+'/include/cpg_workspace.h')
         os.system('cp -R '+output_dir+'/c/src/cpg_solve.c'+' '+mcu_dir+'/src/cpg_solve.c')
@@ -203,13 +196,13 @@ if GEN_CODE:
     problem.solve(verbose=False, solver=SOLVER, max_iters=100)
     print(z.value)
 else:
-    for k in range(NRUNS):
+    for k in range(NTOTAL-NHORIZON-1):
         # Get measurements
         x0_param.value = Xhist[:, k]*1
 
         # Update references
         params["Xref"] = Xref[k:k+NHORIZON]*1
-        params["Uref"] = Uref[k:k+NHORIZON-1]*1
+        # params["Uref"] = Uref[k:k+NHORIZON-1]*1
         q_param.value = update_linear_term(params)[1]
         # print(q_param.value, x0_param.value)
         
@@ -221,23 +214,25 @@ else:
             X[j] = z[xinds[j]].value
             U[j] = z[uinds[j]].value
         X[NHORIZON-1] = z[xinds[NHORIZON-1]].value
+
         Uhist[:, k] = U[0]*1
 
         # Simulate system
-        Xhist[:, k+1] = A @ Xhist[:, k] + B @ Uhist[:, k] + f
+        Xhist[:, k+1] = Ad @ Xhist[:, k] + Bd @ Uhist[:, k] + fd
+        # import pdb; pdb.set_trace()
 
     print(U)
     print(X)
     ## plot results
     import matplotlib.pyplot as plt
     plt.figure()
-    plt.plot(Xhist[:3,:NRUNS-1].T)
+    plt.plot(Xhist[:3,:NTOTAL-1].T)
     # plt.plot(np.array(X))
     plt.title('States')
     plt.show()
 
     plt.figure()
-    plt.plot(Uhist[:,:NRUNS-1].T)
+    plt.plot(Uhist[:,:NTOTAL-1].T)
     # plt.plot(np.array(X))
     plt.title('Controls')
     plt.show()

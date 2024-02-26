@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.hpp"
+#include "admm.hpp"
 
 tinytype Adyn_data[NSTATES * NSTATES] = {
 	1.000000f, 0.000000f, 0.000000f, 0.050000f, 0.000000f, 0.000000f, 
