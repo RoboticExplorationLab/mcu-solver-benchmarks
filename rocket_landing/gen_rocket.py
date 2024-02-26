@@ -166,17 +166,16 @@ params["Xref"] = Xref[0:NHORIZON]*1
 params["Uref"] = Uref[0:NHORIZON-1]*1
 q_param.value = update_linear_term(params)[1]  
 
-# GENERATE CODE (uncomment to generate code)
+# GENERATE CODE (uncomment to generate code), options are set in C programs
 GEN_CODE = 1
 
-opts = {"verbose": False, "max_iters": 500}
 # SOLVER = "ECOS" # PIPELINE FOR ECOS IN `run_ecos.py`
 SOLVER = "SCS"
 
 if GEN_CODE:
     if SOLVER == "ECOS":
         output_dir = 'ecos/generated_ecos'
-        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts, wrapper=False)
+        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, wrapper=False)
         mcu_dir = 'ecos/ecos_teensy'
         socp_export_data_to_c(mcu_dir+'/include', Ad, Bd, fd, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
         os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')
@@ -185,7 +184,7 @@ if GEN_CODE:
         os.system('cp -R '+output_dir+'/c/src/cpg_workspace.c'+' '+mcu_dir+'/src/cpg_workspace.c')
     if SOLVER == "SCS":
         output_dir = 'scs/generated_scs'
-        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts, wrapper=False)
+        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, wrapper=False)
         mcu_dir = 'scs/scs_teensy'
         socp_export_data_to_c(mcu_dir+'/include', Ad, Bd, fd, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
         os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')

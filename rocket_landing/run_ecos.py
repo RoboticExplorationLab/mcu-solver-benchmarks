@@ -161,7 +161,6 @@ q_param.value = update_linear_term(params)[1]
 # GENERATE CODE (uncomment to generate code)
 GEN_CODE = 1
 
-opts = {"verbose": False, "max_iters": 500, "abstol":1e-2, "reltol":1e-3}
 SOLVER = "ECOS"
 
 for k in range(NTOTAL-1):
@@ -177,7 +176,7 @@ for k in range(NTOTAL-1):
     # GENERATE CODE
     if GEN_CODE:
         output_dir = 'ecos/generated_ecos'
-        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts, wrapper=False)
+        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, wrapper=False)
         mcu_dir = 'ecos/ecos_teensy'
         socp_export_data_to_c(mcu_dir+'/include', Ad, Bd, fd, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
         os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')

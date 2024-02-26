@@ -163,11 +163,11 @@ q_param.value = update_linear_term(params)[1]
 # GENERATE CODE (uncomment to generate code)
 GEN_CODE = 1
 
-opts = {"verbose": False, "max_iters": 500}
-# SOLVER = "ECOS" # PIPELINE FOR ECOS IN `run_ecos.py`
-SOLVER = "SCS"
+opts = {"verbose": False, "max_iters": 10, "abs_tol": 1e-6, "rel_tol": 1e-6}
+SOLVER = "ECOS"
+# SOLVER = "SCS"
 
-for k in range(NTOTAL):
+for k in range(1):
     # Get measurements
     x0_param.value = Xhist[:, k]*1
 
@@ -178,16 +178,22 @@ for k in range(NTOTAL):
     # print(q_param.value, x0_param.value)
     
     # Solve MPC problem
-    problem.solve(verbose=False, solver=SOLVER, max_iters=100)
+    if SOLVER == "ECOS":
+        problem.solve(verbose=True, solver=SOLVER, maxit=opts["max_iters"], abstol=opts["abs_tol"], reltol=opts["rel_tol"])
+    if SOLVER == "SCS":
+        problem.solve(verbose=True, solver=SOLVER, max_iters=opts["max_iters"], eps=opts["abs_tol"], acceleration_lookback=0)
     # print(z.value)
     # Extract results
     for j in range(NHORIZON-1):
         X[j] = z[xinds[j]].value
         U[j] = z[uinds[j]].value
     X[NHORIZON-1] = z[xinds[NHORIZON-1]].value
-    print(U[0])
+    
+    # CHECK DYNAMICS CONSTRAINT SATISFACTION
+
 
     Uhist[:, k] = U[0]*1
+    print(Uhist[:, k])
 
     # Simulate system
     Xhist[:, k+1] = Ad @ Xhist[:, k] + Bd @ Uhist[:, k] + fd
