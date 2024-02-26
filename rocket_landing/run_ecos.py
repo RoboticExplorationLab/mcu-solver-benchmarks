@@ -61,25 +61,17 @@ dt = 0.05
 t_vec = dt * np.arange(NTOTAL)
 # print('t_vec', t_vec.shape)
 
-x0 = np.array([4, 2, 20, -3, 2, -4.5])
+x0 = np.array([4, 2, 20, -3, 2, -4.5]) 
 xg = np.array([0, 0, 0, 0, 0, 0.0])
 Xref = [x0 + (xg - x0) * k / (NTOTAL-1) for k in range(NTOTAL)]
 Xref = Xref + [xg for _ in range(NHORIZON)]
 Uref = [[0, 0, 10.] for _ in range(NTOTAL - 1)]
-# import pdb; pdb.set_trace()
-Xref_hrz = Xref[:NHORIZON]*1
-Uref_hrz = Uref[:NHORIZON-1]*1
+Xref_hrz = Xref[0:NHORIZON]*1
+Uref_hrz = Uref[0:NHORIZON-1]*1
 
-# print('Xref', Xref)
-# print('Uref', len(Uref))
 Q = 1e3 * np.eye(NSTATES)
 R = 1e0 * np.eye(NINPUTS)
 Qf = Q*1
-
-# gravity = np.array([0, 0, -9.81])
-# mass = 10.0
-# perWeightMax = 2.0
-# θ_thrust_max = 5.0  # deg
 
 # Sloppy bounds to test
 u_min = -10 * np.ones(NINPUTS)
@@ -167,14 +159,23 @@ params["Uref"] = Uref[0:NHORIZON-1]*1
 q_param.value = update_linear_term(params)[1]  
 
 # GENERATE CODE (uncomment to generate code)
-GEN_CODE = 0
+GEN_CODE = 1
 
-opts = {"verbose": False, "max_iters": 500}
+opts = {"verbose": False, "max_iters": 500, "abstol":1e-2, "reltol":1e-3}
 SOLVER = "ECOS"
-# SOLVER = "SCS"
 
-if GEN_CODE:
-    if SOLVER == "ECOS":
+for k in range(NTOTAL-1):
+    # Get measurements
+    x0_param.value = Xhist[:, k]*1
+
+    # Update references
+    params["Xref"] = Xref[k:k+NHORIZON]*1
+    # params["Uref"] = Uref[k:k+NHORIZON-1]*1
+    q_param.value = update_linear_term(params)[1]
+    # print(q_param.value, x0_param.value)
+
+    # GENERATE CODE
+    if GEN_CODE:
         output_dir = 'ecos/generated_ecos'
         cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts, wrapper=False)
         mcu_dir = 'ecos/ecos_teensy'
@@ -183,59 +184,23 @@ if GEN_CODE:
         os.system('cp -R '+output_dir+'/c/include/cpg_workspace.h'+' '+mcu_dir+'/include/cpg_workspace.h')
         os.system('cp -R '+output_dir+'/c/src/cpg_solve.c'+' '+mcu_dir+'/src/cpg_solve.c')
         os.system('cp -R '+output_dir+'/c/src/cpg_workspace.c'+' '+mcu_dir+'/src/cpg_workspace.c')
-    if SOLVER == "SCS":
-        output_dir = 'scs/generated_scs'
-        cpg.generate_code(problem, code_dir=output_dir, solver=SOLVER, solver_opts=opts, wrapper=False)
-        mcu_dir = 'scs/scs_teensy'
-        socp_export_data_to_c(mcu_dir+'/include', Ad, Bd, fd, Q[0, 0], NSTATES, NINPUTS, NHORIZON, NTOTAL)
-        os.system('cp -R '+output_dir+'/c/include/cpg_solve.h'+' '+mcu_dir+'/include/cpg_solve.h')
-        os.system('cp -R '+output_dir+'/c/include/cpg_workspace.h'+' '+mcu_dir+'/include/cpg_workspace.h')
-        os.system('cp -R '+output_dir+'/c/src/cpg_solve.c'+' '+mcu_dir+'/src/cpg_solve.c')
-        os.system('cp -R '+output_dir+'/c/src/cpg_workspace.c'+' '+mcu_dir+'/src/cpg_workspace.c')
+    
+    # Solve MPC problem
+    problem.solve(verbose=False, solver=SOLVER, max_iters=500, abstol=1e-2, reltol=1e-3)
+    # print(z.value)
+    # Extract results
+    for j in range(NHORIZON-1):
+        X[j] = z[xinds[j]].value
+        U[j] = z[uinds[j]].value
+    X[NHORIZON-1] = z[xinds[NHORIZON-1]].value
+    Uhist[:, k] = U[0]*1
 
-    problem.solve(verbose=False, solver=SOLVER, max_iters=100)
-    print(z.value)
-else:
-    for k in range(2):
-        # Get measurements
-        x0_param.value = Xhist[:, k]*1
+    # Simulate system
+    print("x = ", Xhist[:, k])
+    print("u = ", U[0])
+    Xhist[:, k+1] = Ad @ Xhist[:, k] + Bd @ Uhist[:, k] + fd + np.random.randn(NSTATES)
+    print("xn = ", Xhist[:, k+1])
 
-        # Update references
-        params["Xref"] = Xref[k:k+NHORIZON]*1
-        # params["Uref"] = Uref[k:k+NHORIZON-1]*1
-        q_param.value = update_linear_term(params)[1]
-        # print(q_param.value, x0_param.value)
-        
-        # Solve MPC problem
-        problem.solve(verbose=False, solver=SOLVER, max_iters=100)
-        # print(z.value)
-        # Extract results
-        for j in range(NHORIZON-1):
-            X[j] = z[xinds[j]].value
-            U[j] = z[uinds[j]].value
-        X[NHORIZON-1] = z[xinds[NHORIZON-1]].value
-        print(U[0])
-
-        Uhist[:, k] = U[0]*1
-
-        # Simulate system
-        Xhist[:, k+1] = Ad @ Xhist[:, k] + Bd @ Uhist[:, k] + fd
-        print(Xhist[:, k+1])
-        # import pdb; pdb.set_trace()
-
-    # print(U)
-    # print(X)
-    # ## plot results
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # plt.plot(Xhist[:3,:NTOTAL-1].T)
-    # # plt.plot(np.array(X))
-    # plt.title('States')
-    # plt.show()
-
-    # plt.figure()
-    # plt.plot(Uhist[:,:NTOTAL-1].T)
-    # # plt.plot(np.array(X))
-    # plt.title('Controls')
-    # plt.show()
+    # PRESS C TO STEP
+    import pdb; pdb.set_trace()
 
