@@ -16,7 +16,7 @@ xmax=6,
 xtick={1,2,3,4,5},
 xticklabels={{2},{4},{8},{16},{32}},
 xlabel style={font=\color{white!15!black}},
-xlabel={State dimension (M)},
+xlabel={State dimension (m)},
 ymin=0,
 ymax=150,
 ytick={  0,  40,  80, 120, 160},
@@ -26,7 +26,7 @@ axis background/.style={fill=white},
 xmajorgrids,
 ymajorgrids
 ]
-\addplot [color=blue, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, blue}, forget plot]
+\addplot [color=black!40!blue, line width=5.0pt, mark size=4.2pt, mark=*, mark options={solid, black!40!blue}, forget plot]
   table[row sep=crcr]{%
 1	12.84765625\\
 2	14.09765625\\
@@ -59,7 +59,7 @@ ymajorgrids
 4.8	1\\
 5.2	1\\
 };
-\addplot [color=red, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, red}, forget plot]
+\addplot [color=red, line width=5.0pt, mark size=4.2pt, mark=*, mark options={solid, red}, forget plot]
   table[row sep=crcr]{%
 1	20.71484375\\
 2	29.63671875\\

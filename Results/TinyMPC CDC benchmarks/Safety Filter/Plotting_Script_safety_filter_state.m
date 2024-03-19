@@ -110,44 +110,39 @@ xs_tinympc_index = 1:numel(xs_tinympc);
 xs_osqp = [2,4,8,16];
 xs_osqp_index = 1:numel(xs_osqp);
 
-tinympc_s_result = round(tinympc_s_result);
-osqp_s_result = round(osqp_s_result);
+tinympc_s_result = (round(tinympc_s_result));
+osqp_s_result = (round(osqp_s_result));
 
 figure('Position', [100, 100, 800, 600]);
 min_y = min(tinympc_s_result)
 max_y = max(tinympc_s_result)
 for i = 1:numel(xs_tinympc_index)
-    plot([xs_tinympc_index(i)-0.2, xs_tinympc_index(i)+0.2], [max_y(i), max_y(i)], 'b-', 'LineWidth', 1.5);
+    plot([xs_tinympc_index(i)-0.3, xs_tinympc_index(i)+0.3], [max_y(i), max_y(i)], '-','color', [0, 0, 0.6], 'LineWidth', 1.5);
     hold on 
-    plot([xs_tinympc_index(i)-0.2, xs_tinympc_index(i)+0.2], [min_y(i), min_y(i)], 'b-', 'LineWidth', 1.5);
+    plot([xs_tinympc_index(i)-0.3, xs_tinympc_index(i)+0.3], [min_y(i), min_y(i)], '-','color', [0, 0, 0.6], 'LineWidth', 1.5);
     hold on
 end
-%{
-plot(xs_tinympc, max_y, 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r');
-hold on
-plot(xs_tinympc, min_y, 'go', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
-hold on
-%}
-plot(xs_tinympc_index,mean(tinympc_s_result),'Marker','.','MarkerSize',25,'color', [0, 0, 1], 'LineWidth', 2)
+
+semilogy(xs_tinympc_index,mean(tinympc_s_result),'Marker','.','MarkerSize',25,'color', [0, 0, 0.6], 'LineWidth', 5)
 mean(tinympc_s_result)
 hold on 
 for i = 1:numel(xs_tinympc_index)
-    line([xs_tinympc_index(i) xs_tinympc_index(i)], [max_y(i) min_y(i)], 'Color', 'k', 'LineStyle', '-','LineWidth', 1.5);
+    line([xs_tinympc_index(i) xs_tinympc_index(i)], [max_y(i) min_y(i)], 'Color', [0, 0, 0.6], 'LineStyle', '-','LineWidth', 1.5);
 end
 
 xticks(xs_tinympc_index);
-yticks([0, 800, 1600, 2400, 3200, 4000]); % Specify custom y-axis tick values
+%yticks([4.5, 5.5, 6.5, 7.5, 8.5, 9.5]); % Specify custom y-axis tick values
 xticklabels({'2', '4', '8', '16', '32'});
 xlabel('State dimension (N)', 'FontSize', 24);
-ylabel('Time per iteration (us)', 'FontSize', 24);
+ylabel('Time per iteration (us) - Log Scale', 'FontSize', 24);
 hold on
 
 min_y = min(osqp_s_result)
 max_y = max(osqp_s_result)
 for i = 1:numel(xs_osqp_index)
-    plot([xs_osqp_index(i)-0.2, xs_osqp_index(i)+0.2], [max_y(i), max_y(i)], 'r-', 'LineWidth', 1.5);
+    plot([xs_osqp_index(i)-0.3, xs_osqp_index(i)+0.3], [max_y(i), max_y(i)], 'r-', 'LineWidth', 1.5);
     hold on 
-    plot([xs_osqp_index(i)-0.2, xs_osqp_index(i)+0.2], [min_y(i), min_y(i)], 'r-', 'LineWidth', 1.5);
+    plot([xs_osqp_index(i)-0.3, xs_osqp_index(i)+0.3], [min_y(i), min_y(i)], 'r-', 'LineWidth', 1.5);
     hold on
 end
 %{
@@ -156,48 +151,17 @@ hold on
 plot(xs_tinympc, min_y, 'go', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
 hold on
 %}
-plot(xs_osqp_index,mean(osqp_s_result),'Marker','.','MarkerSize',25,'color', [1, 0, 0], 'LineWidth', 2)
+semilogy(xs_osqp_index,mean(osqp_s_result),'LineStyle','-.','Marker','.','MarkerSize',25,'color', [1, 0, 0], 'LineWidth', 5)
 mean(osqp_s_result)
 hold on 
 for i = 1:numel(xs_osqp_index)
     line([xs_osqp_index(i) xs_osqp_index(i)], [max_y(i) min_y(i)], 'Color', 'r', 'LineStyle', '-','LineWidth', 1.5);
 end
-
-%setBoxParams(boxplot(osqp_s_result,xs_osqp,'Whisker',0,'OutlierSize', 0), osqp_color, box_lw, osqp_box_color);
-%{
-Adjust whiskers for each group
-for i = 1:size(tinympc_s_result, 2)
-    h = findobj(gca, 'Tag', ['Box', num2str(i)]);
-    
-    % Update whiskers for the i-th box plot
-    set(h, 'Whisker', [lower_whisker_lengths(i), upper_whisker_lengths(i)]);
-end
-%}
-%{
-if plot_tinympc
-    if box
-        setBoxParams(boxplot(tinympc_s_result/time_div,xs_tinympc,'Whisker', [lower_whisker_length; upper_whisker_length]), tiny_color, box_lw, tiny_box_color);
-       % boxplot(tinympc_s_result/time_div,xs_tinympc);
-        %setBoxParams(boxchart(xs_tinympc, data.tinympc.nx/time_div), tiny_color, box_lw, tiny_box_color);
-    else
-        setScatterParams(scatter(xs_tinympc, tinympc_s_result/time_div), tiny_color)
-    end
-end
-%}
-% Increase x-axis tick label font size
-set(gca, 'FontSize', 20);
-
-% Increase y-axis tick label font size
-set(gca, 'FontSize', 20);
-grid on;
+set(gca,'yscale','log')
+yticks([1e2, 1e3, 1e4]);
+%grid on;
 matlab2tikz('Safety_filter_state.tikz');
 x = mean(tinympc_s_result(:,1:4))
 y = mean(osqp_s_result)
 y./x
 mean(y./x)
-function setBoxParams(f, color, lineWidth, boxColor)
-    set(f,{'Color'},{color})
-    set(f,{'linew'},{lineWidth})
-    set(f,{'LineStyle'},{'-'});
-    %set(f,{'BoxFaceColor'},{boxColor})
-end

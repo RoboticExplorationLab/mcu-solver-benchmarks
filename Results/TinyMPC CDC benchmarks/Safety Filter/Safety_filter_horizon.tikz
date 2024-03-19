@@ -12,184 +12,157 @@ height=6.792in,
 at={(1.444in,0.917in)},
 scale only axis,
 xmin=0,
-xmax=8,
-xtick={1,2,3,4,5,6,7},
-xticklabels={{4},{10},{16},{22},{30},{40},{50}},
+xmax=7,
+xtick={1,2,3,4,5,6},
+xticklabels={{4},{8},{16},{32},{64},{100}},
 xlabel style={font=\color{white!15!black}},
 xlabel={Time Horizon (N)},
-ymin=0,
-ymax=4000,
-ytick={   0,  800, 1600, 2400, 3200, 4000},
+ymode=log,
+ymin=292,
+ymax=10000,
+ytick={    10,    100,   1000,  10000, 100000},
+yminorticks=true,
 ylabel style={font=\color{white!15!black}},
-ylabel={Time per iteration (us)},
+ylabel={Time per iteration (us)- Log Scale},
 axis background/.style={fill=white},
-xmajorgrids,
-ymajorgrids,
 legend style={legend cell align=left, align=left, draw=white!15!black}
 ]
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-0.8	313\\
-1.2	313\\
+0.6	313\\
+1.4	313\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-0.8	292\\
-1.2	292\\
+0.6	292\\
+1.4	292\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-1.8	792\\
-2.2	792\\
+1.6	631\\
+2.4	631\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-1.8	759\\
-2.2	759\\
+1.6	600\\
+2.4	600\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-2.8	1411\\
-3.2	1411\\
+2.6	1411\\
+3.4	1411\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-2.8	1353\\
-3.2	1353\\
+2.6	1353\\
+3.4	1353\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-3.8	1759\\
-4.2	1759\\
+3.6	2556\\
+4.4	2556\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-3.8	1699\\
-4.2	1699\\
+3.6	2476\\
+4.4	2476\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-4.8	2663\\
-5.2	2663\\
+4.6	5007\\
+5.4	5007\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-4.8	2582\\
-5.2	2582\\
+4.6	4994\\
+5.4	4994\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-5.8	3198\\
-6.2	3198\\
+5.6	7804\\
+6.4	7804\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-5.8	3108\\
-6.2	3108\\
+5.6	7788\\
+6.4	7788\\
 };
-\addplot [color=blue, line width=1.5pt, forget plot]
-  table[row sep=crcr]{%
-6.8	3908\\
-7.2	3908\\
-};
-\addplot [color=blue, line width=1.5pt, forget plot]
-  table[row sep=crcr]{%
-6.8	3899\\
-7.2	3899\\
-};
-\addplot [color=blue, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, blue}]
+\addplot [color=black!40!blue, line width=5.0pt, mark size=4.2pt, mark=*, mark options={solid, black!40!blue}]
   table[row sep=crcr]{%
 1	298.815789473684\\
-2	767.252631578947\\
+2	608.773684210526\\
 3	1363.02105263158\\
-4	1704.14736842105\\
-5	2585.75263157895\\
-6	3110.82105263158\\
-7	3899.57894736842\\
+4	2480.39473684211\\
+5	4994.79473684211\\
+6	7789.57368421053\\
 };
 \addlegendentry{TinyMPC}
 
-\addplot [color=black, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
 1	313\\
 1	292\\
 };
-\addplot [color=black, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-2	792\\
-2	759\\
+2	631\\
+2	600\\
 };
-\addplot [color=black, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
 3	1411\\
 3	1353\\
 };
-\addplot [color=black, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-4	1759\\
-4	1699\\
+4	2556\\
+4	2476\\
 };
-\addplot [color=black, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-5	2663\\
-5	2582\\
+5	5007\\
+5	4994\\
 };
-\addplot [color=black, line width=1.5pt, forget plot]
+\addplot [color=black!40!blue, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-6	3198\\
-6	3108\\
-};
-\addplot [color=black, line width=1.5pt, forget plot]
-  table[row sep=crcr]{%
-7	3908\\
-7	3899\\
+6	7804\\
+6	7788\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-0.8	624\\
-1.2	624\\
+0.6	624\\
+1.4	624\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-0.8	424\\
-1.2	424\\
+0.6	424\\
+1.4	424\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-1.8	1585\\
-2.2	1585\\
+1.6	1262\\
+2.4	1262\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-1.8	1215\\
-2.2	1215\\
+1.6	936\\
+2.4	936\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-2.8	2516\\
-3.2	2516\\
+2.6	2516\\
+3.4	2516\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-2.8	2178\\
-3.2	2178\\
+2.6	2178\\
+3.4	2178\\
 };
-\addplot [color=red, line width=1.5pt, forget plot]
-  table[row sep=crcr]{%
-3.8	3334\\
-4.2	3334\\
-};
-\addplot [color=red, line width=1.5pt, forget plot]
-  table[row sep=crcr]{%
-3.8	2827\\
-4.2	2827\\
-};
-\addplot [color=red, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, red}]
+\addplot [color=red, dashdotted, line width=5.0pt, mark size=4.2pt, mark=*, mark options={solid, red}]
   table[row sep=crcr]{%
 1	609.957894736842\\
-2	1467.03157894737\\
+2	1179.93157894737\\
 3	2344.63157894737\\
-4	3221.81052631579\\
 };
 \addlegendentry{OSQP}
 
@@ -200,18 +173,13 @@ legend style={legend cell align=left, align=left, draw=white!15!black}
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
-2	1585\\
-2	1215\\
+2	1262\\
+2	936\\
 };
 \addplot [color=red, line width=1.5pt, forget plot]
   table[row sep=crcr]{%
 3	2516\\
 3	2178\\
-};
-\addplot [color=red, line width=1.5pt, forget plot]
-  table[row sep=crcr]{%
-4	3334\\
-4	2827\\
 };
 \end{axis}
 \end{tikzpicture}%

@@ -11,8 +11,8 @@ TinyMPC_H_P_2 = readtable('Safety Filter STM32 TinyMPC Problem 2.xlsx', "Sheet",
 TinyMPC_S_P_3 = readtable('Safety Filter STM32 TinyMPC Problem 3.xlsx', "Sheet", 1);
 TinyMPC_H_P_3 = readtable('Safety Filter STM32 TinyMPC Problem 3.xlsx', "Sheet", 2);
 
-osqp_iterations_selectedIndices = [1, 4, 7, 10];
-osqp_solvetimes_selectedIndices = [2, 5, 8, 11];
+osqp_iterations_selectedIndices = [1, 4, 10];
+osqp_solvetimes_selectedIndices = [2, 5, 11];
 
 selectedColumns_osqp_iterations = OSQP_H_P_1(:, osqp_iterations_selectedIndices);
 osqp_iterations_P_1 = table2array(selectedColumns_osqp_iterations);
@@ -51,8 +51,8 @@ for i = 1:numCols
 
 end
 
-tinympc_iterations_selectedIndices = [1, 4, 7, 10, 13, 16, 19];
-tinympc_solvetimes_selectedIndices = [2, 5, 8, 11, 14, 17, 20];
+tinympc_iterations_selectedIndices = [1, 4, 10, 19, 28, 31];
+tinympc_solvetimes_selectedIndices = [2, 5, 11, 20, 29, 32];
 
 selectedColumns_tinympc_iterations = TinyMPC_H_P_1(:, tinympc_iterations_selectedIndices);
 tinympc_iterations_P_1 = table2array(selectedColumns_tinympc_iterations);
@@ -105,13 +105,13 @@ combined_matrix = cat(3, osqp_h_result_p1, osqp_h_result_p2, osqp_h_result_p3);
 osqp_h_result = mean(combined_matrix, 3);
 
 time_div = 1000;
-xs_tinympc = [4,10,16,22,30,40,50];
+xs_tinympc = [4,8,16,32,64,100];
 xs_tinympc_index = 1:numel(xs_tinympc);
-xs_osqp = [4,10,16,22];
+xs_osqp = [4,8,16];
 xs_osqp_index = 1:numel(xs_osqp);
 
-tinympc_h_result = round(tinympc_h_result);
-osqp_h_result = round(osqp_h_result);
+tinympc_h_result = (round(tinympc_h_result))
+osqp_h_result = (round(osqp_h_result))
 
 figure('Position', [100, 100, 800, 600]);
 
@@ -120,35 +120,35 @@ hold on
 min_y = min(tinympc_h_result)
 max_y = max(tinympc_h_result)
 for i = 1:numel(xs_tinympc_index)
-    plot([xs_tinympc_index(i)-0.2, xs_tinympc_index(i)+0.2], [max_y(i), max_y(i)], 'b-', 'LineWidth', 1.5);
+    plot([xs_tinympc_index(i)-0.4, xs_tinympc_index(i)+0.4], [max_y(i), max_y(i)], '-', 'color', [0, 0, 0.6], 'LineWidth', 1.5);
     hold on 
-    plot([xs_tinympc_index(i)-0.2, xs_tinympc_index(i)+0.2], [min_y(i), min_y(i)], 'b-', 'LineWidth', 1.5);
+    plot([xs_tinympc_index(i)-0.4, xs_tinympc_index(i)+0.4], [min_y(i), min_y(i)], '-', 'color', [0, 0, 0.6], 'LineWidth', 1.5);
     hold on
 end
 
-line1 = plot(xs_tinympc_index,mean(tinympc_h_result),'Marker','.','MarkerSize',25,'color', [0, 0, 1], 'LineWidth', 2, 'DisplayName','TinyMPC')
+line1 = semilogy(xs_tinympc_index,mean(tinympc_h_result),'Marker','.','MarkerSize',25,'color', [0, 0, 0.6], 'LineWidth', 5, 'DisplayName','TinyMPC')
 hold on 
 for i = 1:numel(xs_tinympc_index)
-    line([xs_tinympc_index(i) xs_tinympc_index(i)], [max_y(i) min_y(i)], 'Color', 'k', 'LineStyle', '-','LineWidth', 1.5);
+    line([xs_tinympc_index(i) xs_tinympc_index(i)], [max_y(i) min_y(i)], 'Color', [0, 0, 0.6], 'LineStyle', '-','LineWidth', 1.5);
 end
 
 xticks(xs_tinympc_index);
-yticks([0, 800, 1600, 2400, 3200, 4000]); % Specify custom y-axis tick values
-xticklabels({'4', '10', '16', '22', '30','40','50'});
+%yticks([100, 1000, 10000]); % Specify custom y-axis tick values
+xticklabels({'4', '8', '16', '32', '64','100'});
 xlabel('Time Horizon (N)', 'FontSize', 24);
-ylabel('Time per iteration (us)', 'FontSize', 24);
+ylabel('Time per iteration (us)- Log Scale', 'FontSize', 24);
 hold on
 
 min_y = min(osqp_h_result)
 max_y = max(osqp_h_result)
 for i = 1:numel(xs_osqp_index)
-    plot([xs_osqp_index(i)-0.2, xs_osqp_index(i)+0.2], [max_y(i), max_y(i)], 'r-', 'LineWidth', 1.5);
+    plot([xs_osqp_index(i)-0.4, xs_osqp_index(i)+0.4], [max_y(i), max_y(i)], 'r-', 'LineWidth', 1.5);
     hold on 
-    plot([xs_osqp_index(i)-0.2, xs_osqp_index(i)+0.2], [min_y(i), min_y(i)], 'r-', 'LineWidth', 1.5);
+    plot([xs_osqp_index(i)-0.4, xs_osqp_index(i)+0.4], [min_y(i), min_y(i)], 'r-', 'LineWidth', 1.5);
     hold on
 end
 
-line2 = plot(xs_osqp_index,mean(osqp_h_result),'Marker','.','MarkerSize',25,'color', [1, 0, 0], 'LineWidth', 2, 'DisplayName','OSQP')
+line2 = semilogy(xs_osqp_index,mean(osqp_h_result),'LineStyle','-.','Marker','.','MarkerSize',25,'color', [1, 0, 0], 'LineWidth', 5, 'DisplayName','OSQP')
 
 hold on 
 for i = 1:numel(xs_osqp_index)
@@ -159,13 +159,15 @@ set(gca, 'FontSize', 20);
 
 % Increase y-axis tick label font size
 set(gca, 'FontSize', 20);
+set(gca,'yscale','log')
+yticks([1e1, 1e2, 1e3, 1e4, 1e5]);
 legend([line1, line2], 'TinyMPC', 'OSQP');
 box on;
-grid on;
+%grid on;
 
 matlab2tikz('Safety_filter_horizon.tikz');
 
-x = mean(tinympc_h_result(:,1:4))
+x = mean(tinympc_h_result(:,1:3))
 y = mean(osqp_h_result)
 y./x
 mean(y./x)

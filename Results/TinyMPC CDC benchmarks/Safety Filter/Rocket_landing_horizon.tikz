@@ -1,0 +1,303 @@
+% This file was created by matlab2tikz.
+%
+%The latest updates can be retrieved from
+%  http://www.mathworks.com/matlabcentral/fileexchange/22022-matlab2tikz-matlab2tikz
+%where you can also make suggestions and rate matlab2tikz.
+%
+\begin{tikzpicture}
+
+\begin{axis}[%
+width=8.611in,
+height=6.792in,
+at={(1.444in,0.917in)},
+scale only axis,
+unbounded coords=jump,
+xmin=0,
+xmax=7,
+xtick={1,2,3,4,5,6},
+xticklabels={{2},{4},{8},{16},{32},{64}},
+xlabel style={font=\color{white!15!black}},
+xlabel={Time Horizon (N)},
+ymin=1,
+ymax=10,
+ytick={    0,  4000,  8000, 12000, 16000, 20000},
+ylabel style={font=\color{white!15!black}},
+ylabel={Time per iteration (us)},
+axis background/.style={fill=white},
+xmajorgrids,
+ymajorgrids,
+legend style={legend cell align=left, align=left, draw=white!15!black}
+]
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+0.8	1.38629436111989\\
+1.2	1.38629436111989\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+0.8	1.38629436111989\\
+1.2	1.38629436111989\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1.8	2.30258509299405\\
+2.2	2.30258509299405\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1.8	2.19722457733622\\
+2.2	2.19722457733622\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2.8	3.04452243772342\\
+3.2	3.04452243772342\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2.8	2.99573227355399\\
+3.2	2.99573227355399\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3.8	3.8286413964891\\
+4.2	3.8286413964891\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3.8	3.78418963391826\\
+4.2	3.78418963391826\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4.8	4.53259949315326\\
+5.2	4.53259949315326\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4.8	4.51085950651685\\
+5.2	4.51085950651685\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+5.8	5.23110861685459\\
+6.2	5.23110861685459\\
+};
+\addplot [color=blue, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+5.8	5.21493575760899\\
+6.2	5.21493575760899\\
+};
+\addplot [color=blue, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, blue}]
+  table[row sep=crcr]{%
+1	nan\\
+2	2.28823366062869\\
+3	3.0299340165432\\
+4	3.8076749183393\\
+5	4.51452359584684\\
+6	5.21662269055802\\
+};
+\addlegendentry{TinyMPC}
+
+\addplot [color=black, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1	1.38629436111989\\
+1	1.38629436111989\\
+};
+\addplot [color=black, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2	2.30258509299405\\
+2	2.19722457733622\\
+};
+\addplot [color=black, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3	3.04452243772342\\
+3	2.99573227355399\\
+};
+\addplot [color=black, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4	3.8286413964891\\
+4	3.78418963391826\\
+};
+\addplot [color=black, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+5	4.53259949315326\\
+5	4.51085950651685\\
+};
+\addplot [color=black, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+6	5.23110861685459\\
+6	5.21493575760899\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+0.8	6.04500531403601\\
+1.2	6.04500531403601\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+0.8	6.01859321449623\\
+1.2	6.01859321449623\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1.8	6.95654544315157\\
+2.2	6.95654544315157\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1.8	6.93147180559945\\
+2.2	6.93147180559945\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2.8	7.91169052070834\\
+3.2	7.91169052070834\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2.8	7.8815599170569\\
+3.2	7.8815599170569\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3.8	8.87472776576685\\
+4.2	8.87472776576685\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3.8	8.82350072799118\\
+4.2	8.82350072799118\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4.8	9.80609520652748\\
+5.2	9.80609520652748\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4.8	9.74578055650609\\
+5.2	9.74578055650609\\
+};
+\addplot [color=red, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, red}]
+  table[row sep=crcr]{%
+1	6.0327558594848\\
+2	6.94243468880324\\
+3	7.89596658841524\\
+4	8.85589920311341\\
+5	9.77712736899021\\
+};
+\addlegendentry{ECOS}
+
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1	6.04500531403601\\
+1	6.01859321449623\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2	6.95654544315157\\
+2	6.93147180559945\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3	7.91169052070834\\
+3	7.8815599170569\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4	8.87472776576685\\
+4	8.82350072799118\\
+};
+\addplot [color=red, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+5	9.80609520652748\\
+5	9.74578055650609\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+0.8	4.56434819146784\\
+1.2	4.56434819146784\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+0.8	3.95124371858143\\
+1.2	3.95124371858143\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1.8	5.40267738187228\\
+2.2	5.40267738187228\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1.8	4.7361984483945\\
+2.2	4.7361984483945\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2.8	6.1779441140506\\
+3.2	6.1779441140506\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2.8	5.4971682252932\\
+3.2	5.4971682252932\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3.8	6.49375383985169\\
+4.2	6.49375383985169\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3.8	6.36990098282823\\
+4.2	6.36990098282823\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4.8	7.29641326877392\\
+5.2	7.29641326877392\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4.8	7.20414929203594\\
+5.2	7.20414929203594\\
+};
+\addplot [color=green, line width=2.0pt, mark size=4.2pt, mark=*, mark options={solid, green}]
+  table[row sep=crcr]{%
+1	3.95625491338711\\
+2	4.77937397399358\\
+3	5.51216677677748\\
+4	6.4188946830992\\
+5	7.24048659862394\\
+};
+\addlegendentry{SCS}
+
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+1	4.56434819146784\\
+1	3.95124371858143\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+2	5.40267738187228\\
+2	4.7361984483945\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+3	6.1779441140506\\
+3	5.4971682252932\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+4	6.49375383985169\\
+4	6.36990098282823\\
+};
+\addplot [color=green, line width=1.5pt, forget plot]
+  table[row sep=crcr]{%
+5	7.29641326877392\\
+5	7.20414929203594\\
+};
+\end{axis}
+\end{tikzpicture}%

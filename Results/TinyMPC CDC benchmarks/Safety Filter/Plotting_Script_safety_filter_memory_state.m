@@ -58,7 +58,7 @@ xs_tinympc = [2,4,8,16,32];
 xs_tinympc_index = 1:numel(xs_tinympc);
 xs_osqp = [2,4,8,16,32];
 xs_osqp_index = 1:numel(xs_osqp);
-plot(xs_tinympc_index,avg_mem_tinympc,'Marker','.','MarkerSize',25,'color', [0, 0, 1], 'LineWidth', 2)
+plot(xs_tinympc_index,avg_mem_tinympc,'Marker','.','MarkerSize',25,'color', [0, 0, 0.6], 'LineWidth', 5)
 hold on 
 
 for i = 1:numel(xs_tinympc_index)
@@ -68,11 +68,11 @@ end
 xticks(xs_tinympc_index);
 yticks([0, 40, 80, 120, 160]); % Specify custom y-axis tick values
 xticklabels({'2', '4', '8', '16', '32'});
-xlabel('State dimension (M)', 'FontSize', 24);
+xlabel('State dimension (m)', 'FontSize', 24);
 ylabel('Memory Usage (kB)', 'FontSize', 24);
 hold on
 
-plot(xs_osqp_index,avg_mem_osqp,'Marker','.','MarkerSize',25,'color', [1, 0, 0], 'LineWidth', 2)
+plot(xs_osqp_index,avg_mem_osqp,'Marker','.','MarkerSize',25,'color', [1, 0, 0], 'LineWidth', 5)
 hold on
 yline(128, '--', 'Label', 'RAM Threshold [128 kB]','FontSize', 18, 'LineWidth', 2);
 % Increase x-axis tick label font size

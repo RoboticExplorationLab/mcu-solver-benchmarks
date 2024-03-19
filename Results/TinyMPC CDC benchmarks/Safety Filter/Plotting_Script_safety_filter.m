@@ -216,6 +216,7 @@ set(gca, 'FontSize', 20);
 
 % Increase y-axis tick label font size
 set(gca, 'FontSize', 20);
+set(gca,'yscale','log')
 grid on;
 matlab2tikz('Safety_filter_state.tikz');
 function setBoxParams(f, color, lineWidth, boxColor)
