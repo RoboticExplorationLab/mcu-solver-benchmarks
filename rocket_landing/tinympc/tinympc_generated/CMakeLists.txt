@@ -1,10 +1,12 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(TinyMPC VERSION 0.2.0 LANGUAGES CXX)
+cmake_minimum_required (VERSION 3.5)
+project(TinyMPC VERSION 0.2.0 LANGUAGES C)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_FLAGS "-g")
+# compiler configuration
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
+    set (CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")
+endif()
 
 include_directories(include/Eigen)
 

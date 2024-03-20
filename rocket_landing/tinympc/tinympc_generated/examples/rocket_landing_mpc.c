@@ -14,11 +14,12 @@
 
 #include <iostream>
 
-#include <tinympc/admm.hpp>
+#include "tinympc/admm.hpp"
 #include "problem_data/rocket_landing_params_20hz.hpp"
+// #include "trajectory_data/rocket_landing_ref_traj_20hz.hpp"
 
-// Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-// Eigen::IOFormat SaveData(4, 0, ", ", "\n");
+Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+Eigen::IOFormat SaveData(4, 0, ", ", "\n");
 
 static int i = 0;
 
@@ -94,11 +95,19 @@ extern "C"
         //////// Initialize other workspace values automatically
         reset_problem(&solver);
 
+        tiny_VectorNx x0, x1;    // current and next simulation states
         tiny_VectorNx xinit, xg; // initial and goal states
+
+        // Map data from trajectory_data
+        // Matrix<tinytype, NSTATES, NTOTAL> Xref_total = Eigen::Map<Matrix<tinytype, NSTATES, NTOTAL, Eigen::ColMajor>>(Xref_data);
+        // Matrix<tinytype, NINPUTS, NTOTAL-1> Uref_total = Eigen::Map<Matrix<tinytype, NINPUTS, NTOTAL-1, Eigen::ColMajor>>(Uref_data);
+        // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, 0);
+        // work.Uref = Xref_total.block<NINPUTS, NHORIZON-1>(0, 0);
 
         // Initial state
         xinit << 4, 2, 20, -3, 2, -4.5;
         xg << 0, 0, 0, 0, 0, 0.0;
+        x0 = xinit * 1.1;
 
         // Uref stays constant
         for (int i = 0; i < NHORIZON - 1; i++)
@@ -109,25 +118,75 @@ extern "C"
         {
             work.Xref.col(i) = xinit + (xg - xinit) * tinytype(i) / (NTOTAL);
         }
+        work.p.col(NHORIZON - 1) = -cache.Pinf * work.Xref.col(NHORIZON - 1);
 
-        // 1. Update measurement
-        work.x.col(0) = xinit * 1.1;
+        tinytype tracking_error = 0;
 
-        // 2. Update reference
-        for (int i = 0; i < NHORIZON; i++)
+        srand(1);
+        for (int k = 0; k < NTOTAL; ++k)
+        // for (int k=0; k < 50; k++)
         {
-            if (i >= NTOTAL)
+            // std::cout << "tracking error: " << (x0 - work.Xref.col(1)).norm() << std::endl;
+            // tracking_error = (x0 - work.Xref.col(0)).norm();
+            // Serial.print("tracking error: ");
+            // Serial.println(tracking_error, 4);
+
+            // 1. Update measurement
+            work.x.col(0) = x0;
+
+            // 2. Update reference
+            for (int i = 0; i < NHORIZON; i++)
             {
-                work.Xref.col(i) = xg;
+                if (k + i >= NTOTAL)
+                {
+                    work.Xref.col(i) = xg;
+                }
+                else
+                {
+                    work.Xref.col(i) = xinit + (xg - xinit) * tinytype(i + k) / (NTOTAL);
+                }
             }
-            else
-            {
-                work.Xref.col(i) = xinit + (xg - xinit) * tinytype(i) / (NTOTAL);
-            }
+            // work.Xref = Xref_total.block<NSTATES, NHORIZON>(0, k);
+            // work.Uref = Uref_total.block<NINPUTS, NHORIZON-1>(0, k);
+
+            // 3. Reset dual variables if needed
+            // work.y = tiny_MatrixNuNhm1::Zero();
+            // work.g = tiny_MatrixNxNh::Zero();
+            // reset_dual(&solver);
+
+            // 4. Solve MPC problem
+            // unsigned long start = micros();
+            tiny_solve(&solver);
+            // unsigned long end = micros();
+
+            std::cout << "iterations: " << work.iter << std::endl;
+            // std::cout << "controls: " << work.u.col(0).transpose().format(CleanFmt) << std::endl;
+            // std::cout << std::endl;
+            // printf("STEP: %3d TIME: %8d \n", k, (int)(end - start));
+            // Serial.print("iterations: ");
+            // Serial.println(work.iter);
+            // Serial.print("controls: ");
+            // Serial.print(work.u.col(0)(0));
+            // Serial.print(" ");
+            // Serial.print(work.u.col(0)(1));
+            // Serial.print(" ");
+            // Serial.print(work.u.col(0)(2));
+            // Serial.println("");
+
+            // printf("%3d %8d\n", work.iter, (int)(end - start));
+
+            // 5. Simulate forward
+            x1 = work.Adyn * x0 + work.Bdyn * work.u.col(0) + work.fdyn;
+            x0 = x1;
+            x0 += tiny_VectorNx::Random() * 0.01;
+
+            // DATA LOGGING
+            // Serial.print(work.iter); Serial.print(" "); Serial.println((int)(end - start));
         }
 
-        tiny_solve(&solver);
-        // std::cout << solver.work->iter << std::endl;
+        // unsigned long end = micros();
+
+        // Serial.print("total solve time: "); Serial.print((end - start)/1000000); Serial.println(" seconds");
         return 0;
     }
 
