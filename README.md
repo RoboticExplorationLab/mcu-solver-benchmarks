@@ -12,7 +12,7 @@ Benchmarking solvers on microcontrollers (MCU), within TinyMPC project
 
 ## How to use
 
-Please check READE.md in each folder
+Please check README.md in each folder
 
 ## Ready-to-run program
 
